@@ -25,7 +25,15 @@
 
 package games.negative.alumina.command;
 
+import com.google.common.collect.ImmutableList;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This interface is used to mark a class as a command.
@@ -43,4 +51,34 @@ public interface Command {
      * @param context The context of the command.
      */
     void execute(@NotNull Context context);
+
+    /**
+     * This method is called when the command is tab completed.
+     * @param context The context of the command.
+     * @return a list of possible completions for the command.
+     */
+    @NotNull
+    default List<String> onTabComplete(@NotNull TabContext context) {
+        CommandSender sender = context.sender();
+        String[] args = context.args();
+
+        if (args.length == 0) {
+            return ImmutableList.of();
+        }
+
+        String lastWord = context.lastArgument();
+
+        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
+
+        List<String> matchedPlayers = new ArrayList<>();
+        for (Player player : sender.getServer().getOnlinePlayers()) {
+            String name = player.getName();
+            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+                matchedPlayers.add(name);
+            }
+        }
+
+        matchedPlayers.sort(String.CASE_INSENSITIVE_ORDER);
+        return matchedPlayers;
+    }
 }
