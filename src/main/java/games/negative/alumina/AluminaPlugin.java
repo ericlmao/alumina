@@ -25,6 +25,7 @@
 
 package games.negative.alumina;
 
+import com.google.common.collect.Lists;
 import games.negative.alumina.command.builder.CommandBuilder;
 import games.negative.alumina.command.structure.AluminaCommand;
 import games.negative.alumina.listener.MenuListener;
@@ -38,9 +39,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,13 +72,91 @@ public abstract class AluminaPlugin extends JavaPlugin {
      * @param builder The builder used to create the command.
      */
     public void registerCommand(@NotNull CommandBuilder builder) {
+        CommandMap commandMap = initCommandMap();
+        if (commandMap == null) return;
+
+        String name = builder.getName();
+
+        Command existing = commandMap.getCommand(name);
+        if (existing != null) {
+            cleanse(name, existing, commandMap);
+        }
+
+        AluminaCommand command = builder.build();
+        commandMap.register(name, command);
+
+        List<AluminaCommand> sub = getRecursiveSubCommand(command);
+        if (sub.isEmpty()) return;
+
+        for (AluminaCommand cmd : sub) {
+            String[] shortcuts = cmd.getShortcuts();
+            if (shortcuts == null) continue;
+
+            for (String shortcut : shortcuts) {
+                Command existingShortcut = commandMap.getCommand(shortcut);
+                if (existingShortcut != null) {
+                    cleanse(shortcut, existingShortcut, commandMap);
+                }
+
+                commandMap.register(shortcut, cmd);
+            }
+        }
+    }
+
+    /**
+     * This method is used to get all subcommands of a command.
+     * @param parent The parent command.
+     * @return A list of all subcommands.
+     */
+    @NotNull
+    private List<AluminaCommand> getRecursiveSubCommand(@NotNull AluminaCommand parent) {
+        // Recursively get all subcommands of all subcommands.
+        List<AluminaCommand> list = Lists.newArrayList(parent.getSubCommands());
+
+        for (AluminaCommand subCommand : parent.getSubCommands()) {
+            List<AluminaCommand> recursiveSubCommands = getRecursiveSubCommand(subCommand);
+            if (recursiveSubCommands.isEmpty())
+                break;
+
+            list.addAll(recursiveSubCommands);
+        }
+
+        return list;
+    }
+
+    /**
+     * This method is used to remove a command from the command map.
+     * @param name The name of the command.
+     * @param existing The existing command.
+     * @param commandMap The command map.
+     */
+    private void cleanse(@NotNull String name, @NotNull Command existing, @NotNull CommandMap commandMap) {
+        Map<String, Command> map;
+        try {
+            map = (Map<String, Command>) commandMap.getClass().getDeclaredMethod("getKnownCommands").invoke(commandMap);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            getLogger().severe("Could not retrieve the command map. (Illegal Access, Invocation Target, No Such Method)");
+            return;
+        }
+
+        existing.unregister(commandMap);
+        map.remove(name);
+        existing.getAliases().forEach(map::remove);
+    }
+
+    /**
+     * This method is used to initialize the command map.
+     * @return The command map.
+     */
+    @Nullable
+    private CommandMap initCommandMap() {
         Server server = Bukkit.getServer();
         Field field;
         try {
             field = server.getClass().getDeclaredField("commandMap");
         } catch (NoSuchFieldException e) {
             getLogger().severe("Could not retrieve the command map. (No Such Field)");
-            return;
+            return null;
         }
 
         field.setAccessible(true);
@@ -85,30 +166,12 @@ public abstract class AluminaPlugin extends JavaPlugin {
             commandMap = (CommandMap) field.get(server);
         } catch (IllegalAccessException e) {
             getLogger().severe("Could not retrieve the command map. (Illegal Access)");
-            return;
+            return null;
         }
 
-        String name = builder.getName();
-
-        Command existing = commandMap.getCommand(name);
-        if (existing != null) {
-            Map<String, Command> map;
-            try {
-                map = (Map<String, Command>) commandMap.getClass().getDeclaredMethod("getKnownCommands").invoke(commandMap);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                getLogger().severe("Could not retrieve the command map. (Illegal Access, Invocation Target, No Such Method)");
-                return;
-            }
-
-            existing.unregister(commandMap);
-            map.remove(name);
-            existing.getAliases().forEach(map::remove);
-        }
-
-        AluminaCommand command = builder.build();
-        commandMap.register(name, command);
+        return commandMap;
     }
-
+    
     public void registerListeners(@NotNull Listener... listeners) {
         PluginManager manager = Bukkit.getPluginManager();
 

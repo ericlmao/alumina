@@ -59,6 +59,7 @@ public class CommandBuilder {
      */
     // Command Settings
     private String name;
+
     /**
      * -- GETTER --
      *  Get the description of the command.
@@ -66,6 +67,7 @@ public class CommandBuilder {
      * @return The description of the command.
      */
     private String description;
+
     /**
      * -- GETTER --
      *  Get the usage of the command.
@@ -73,6 +75,7 @@ public class CommandBuilder {
      * @return The usage of the command.
      */
     private String usage;
+
     /**
      * -- GETTER --
      *  Get the aliases of the command.
@@ -80,6 +83,7 @@ public class CommandBuilder {
      * @return The aliases of the command.
      */
     private List<String> aliases;
+
     /**
      * -- GETTER --
      *  Get the state of the command.
@@ -87,6 +91,7 @@ public class CommandBuilder {
      * @return The state of the command.
      */
     private boolean playerOnly;
+
     /**
      * -- GETTER --
      *  Get the permissions of the command.
@@ -94,6 +99,7 @@ public class CommandBuilder {
      * @return The permissions of the command.
      */
     private Permission[] permissions;
+
     /**
      * -- GETTER --
      *  Get the parameters of the command.
@@ -101,6 +107,15 @@ public class CommandBuilder {
      * @return The parameters of the command.
      */
     private String[] params;
+
+    /**
+     * -- GETTER --
+     * Get the shortcuts of the command.
+     *
+     * @return The shortcuts of the command.
+     */
+    private String[] shortcuts;
+
     /**
      * -- GETTER --
      *  Get the sub commands of the command.
@@ -236,6 +251,17 @@ public class CommandBuilder {
     public CommandBuilder params(@NotNull String... params) {
         Preconditions.checkNotNull(params, "Command params cannot be null.");
         this.params = params;
+        return this;
+    }
+
+    /**
+     * Set the shortcuts of the command.
+     * @param shortcuts The shortcuts of the command.
+     * @return The command builder.
+     */
+    public CommandBuilder shortcuts(@NotNull String... shortcuts) {
+        Preconditions.checkNotNull(shortcuts, "Command shortcuts cannot be null.");
+        this.shortcuts = shortcuts;
         return this;
     }
 

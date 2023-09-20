@@ -82,6 +82,11 @@ public class AluminaCommand extends org.bukkit.command.Command {
      */
     private final String[] params;
 
+    /**
+     * The shortcuts of this command.
+     */
+    private final String[] shortcuts;
+
     /*
      * Whether this command is player-only.
      */
@@ -110,6 +115,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
         this.playerOnly = builder.isPlayerOnly();
         this.permissions = builder.getPermissions();
         this.params = builder.getParams();
+        this.shortcuts = builder.getShortcuts();
 
         if (builder.getUsage() != null)
             this.setUsage(builder.getUsage());
@@ -244,4 +250,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return parent;
     }
 
+    public String[] getShortcuts() {
+        return shortcuts;
+    }
 }
