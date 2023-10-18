@@ -6,6 +6,9 @@ on:
     branches:
       - main
       - 'releases/*'
+      - 'dev/*'
+      - 'feature/*'
+      - 'experimental/*'
 
 jobs:
   qodana:
