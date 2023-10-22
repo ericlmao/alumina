@@ -79,7 +79,8 @@ public class ChestMenuHolder implements AluminaMenuHolder<ChestMenu> {
         MenuItem menuItem = gui.byKey(function);
         if (menuItem == null) return;
 
-        gui.onFunctionClick(player, menuItem, event);
+        gui.onFunctionClick(player, menuItem, event); // This is deprecated but we will still support it for now.
+        gui.onFunctionClick(player, function, event);
     }
 
     @Override

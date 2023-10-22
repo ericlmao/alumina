@@ -36,11 +36,13 @@ import games.negative.alumina.util.ColorUtil;
 import games.negative.alumina.util.MathUtil;
 import games.negative.alumina.util.NBTEditor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -169,14 +171,11 @@ public abstract class ChestMenu implements AluminaMenu {
     public void clearSlot(int slot) {
         inventory.clear(slot);
 
-        if (freeSlots != null && !freeSlots.contains(slot)) {
-            freeSlots.add(slot);
-        }
+        if (freeSlots != null && !freeSlots.contains(slot)) freeSlots.add(slot);
 
         // Ensure to remove from the map.
         MenuItem removed = items.remove(slot);
-        if (removed != null)
-            byKey.remove(removed.key());
+        if (removed != null && removed.key() != null) byKey.remove(removed.key());
     }
 
     /**
@@ -185,7 +184,7 @@ public abstract class ChestMenu implements AluminaMenu {
      */
     @Override
     public void open(@NotNull Player player) {
-        refresh();
+        refresh(player);
 
         player.openInventory(inventory);
     }
@@ -194,17 +193,13 @@ public abstract class ChestMenu implements AluminaMenu {
      * This method will allow you to refresh the menu.
      */
     @Override
-    public void refresh() {
+    public void refresh(@Nullable Player player) {
         if (inventory == null) this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), (rows * 9), ColorUtil.translate(title));
 
+        inventory.clear();
+
         items.forEach((index, item) -> {
-            if (index >= inventory.getSize()) {
-                // Disabled for now.
-//                Logger logger = Bukkit.getLogger();
-//                logger.warning("Tried to set item in slot " + index + " but the inventory only has " + inventory.getSize() + " slots.");
-//                logger.warning("Item: " + item.toString());
-                return;
-            }
+            if (index >= inventory.getSize()) return;
 
             inventory.setItem(index, item.item());
         });
@@ -216,6 +211,25 @@ public abstract class ChestMenu implements AluminaMenu {
      */
     public void setTitle(@NotNull String title) {
         this.title = title;
+
+        updateTitle();
+    }
+
+    /**
+     * This method will allow you to update the menu title in real-time.
+     */
+    public void updateTitle() {
+        if (inventory == null) return;
+
+        for (HumanEntity viewer : inventory.getViewers()) {
+            InventoryView open = viewer.getOpenInventory();
+
+            try {
+                open.setTitle(ColorUtil.translate(title));
+            } catch (Exception ignored) {
+                // We could not update the title, so we'll just ignore it.
+            }
+        }
     }
 
     public void setRows(int rows) {
@@ -239,9 +253,21 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param player The player who clicked the menu.
      * @param item   The item that was clicked.
      * @param event  The event.
+     * @deprecated Use {@link #onFunctionClick(Player, String, InventoryClickEvent)} instead.
      */
     @Override
     public void onFunctionClick(@NotNull Player player, @NotNull MenuItem item, @NotNull InventoryClickEvent event) {
+        // Override this method to handle function clicks.
+    }
+
+    /**
+     * This method is invoked when a player clicks a functional item in the menu.
+     * @param player The player who clicked the menu.
+     * @param key The function key.
+     * @param event The event.
+     */
+    @Override
+    public void onFunctionClick(@NotNull Player player, @NotNull String key, @NotNull InventoryClickEvent event) {
         // Override this method to handle function clicks.
     }
 
@@ -282,8 +308,8 @@ public abstract class ChestMenu implements AluminaMenu {
     }
 
     /**
-     * Get the amount of rows.
-     * @return The amount of rows.
+     * Get the number of rows.
+     * @return The number of rows.
      */
     public int getRows() {
         return rows;
