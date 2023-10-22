@@ -99,7 +99,7 @@ public interface AluminaMenu {
     /**
      * This method will allow you to refresh the menu.
      */
-    void refresh();
+    void refresh(@Nullable Player player);
 
     /**
      * This method will allow you to listen to the open event of the menu.
@@ -131,8 +131,16 @@ public interface AluminaMenu {
      * @param player The player who clicked the menu.
      * @param item   The item that was clicked.
      * @param event  The event.
+     * @deprecated Use {@link #onFunctionClick(Player, String, InventoryClickEvent)} instead.
      */
+    @Deprecated
     void onFunctionClick(@NotNull Player player, @NotNull MenuItem item, @NotNull InventoryClickEvent event);
 
-
+    /**
+     * This method will allow you to listen to the function click event of the menu.
+     * @param player The player who clicked the menu.
+     * @param key The function key.
+     * @param event The event.
+     */
+    void onFunctionClick(@NotNull Player player, @NotNull String key, @NotNull InventoryClickEvent event);
 }
