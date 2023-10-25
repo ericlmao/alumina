@@ -31,6 +31,9 @@ package games.negative.alumina.util;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+
 /**
  * Represents a time-formatting utility which is used to format time into
  * a human-readable format.
@@ -62,7 +65,8 @@ public class TimeUtil {
         String minuteFormat = (toMin != 0 ? toMin + (small ? "" : " ") + minute + " " : "");
         String secondFormat = (toSec != 0 ? toSec + (small ? "" : " ") + second : "");
 
-        return dayFormat + hourFormat + minuteFormat + secondFormat;
+        TimeFormatter formatter = new TimeFormatter(dayFormat, hourFormat, minuteFormat, secondFormat);
+        return formatter.toString();
     }
 
     /**
@@ -126,5 +130,28 @@ public class TimeUtil {
             }
         }
         return 1000L * (seconds + minutes * 60L + hours * 60 * 60L + days * 24 * 60 * 60L + weeks * 7 * 24 * 60 * 60L);
+    }
+
+    /**
+     * The class to format time
+     */
+    private static class TimeFormatter {
+        private final LinkedList<String> entries = new LinkedList<>();
+
+        public TimeFormatter(@NotNull String... entries) {
+            this.entries.addAll(Arrays.asList(entries));
+        }
+
+        @NotNull
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            for (String entry : entries) {
+                if (entry.isBlank() || entry.isEmpty()) continue;
+
+                builder.append(entry);
+            }
+
+            return builder.toString();
+        }
     }
 }
