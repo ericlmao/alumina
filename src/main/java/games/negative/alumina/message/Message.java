@@ -122,7 +122,7 @@ public class Message implements Deliverable<CommandSender> {
     }
 
     /**
-     * Send the final message to a iterable collection of a class that extends {@link CommandSender}
+     * Send the final message to an iterable collection of a class that extends {@link CommandSender}
      *
      * @param iterable The iterable collection of a class that extends {@link CommandSender}
      * @param <T>      The class that extends {@link CommandSender}
