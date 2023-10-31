@@ -6,6 +6,56 @@ package games.negative.alumina.util;
 public class MathUtil {
 
     /**
+     * This method will return the absolute difference between the given values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return The absolute difference between the given values.
+     */
+    public static int absDiff(int a, int b) {
+        return Math.abs(a - b);
+    }
+
+    /**
+     * This method will return the absolute difference between the given values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return The absolute difference between the given values.
+     */
+    public static double absDiff(double a, double b) {
+        return Math.abs(a - b);
+    }
+
+    /**
+     * This method will return the absolute difference between the given values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return The absolute difference between the given values.
+     */
+    public static float absDiff(float a, float b) {
+        return Math.abs(a - b);
+    }
+
+    /**
+     * This method will return the absolute difference between the given values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return The absolute difference between the given values.
+     */
+    public static long absDiff(long a, long b) {
+        return Math.abs(a - b);
+    }
+
+    /**
+     * This method will return the absolute difference between the given values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return The absolute difference between the given values.
+     */
+    public static short absDiff(short a, short b) {
+        return (short) Math.abs(a - b);
+    }
+
+    /**
      * This method will check if the given value is between the given min and max.
      * @param value The value to check.
      * @param min The minimum value.
