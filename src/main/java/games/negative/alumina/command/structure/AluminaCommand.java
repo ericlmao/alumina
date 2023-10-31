@@ -138,7 +138,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {
-        if (checkConsolePlayerCommand(sender) || !checkPermissions(sender) || !checkParams(sender, args) || checkSubCommands(sender, args))
+        if (checkConsolePlayerCommand(sender) || !checkPermissions(sender, true) || !checkParams(sender, args) || checkSubCommands(sender, args))
             return true;
 
         Context context = new Context(args, sender);
@@ -165,6 +165,8 @@ public class AluminaCommand extends org.bukkit.command.Command {
 
         Collection<AluminaCommand> commands = subMap.get(placement);
         for (AluminaCommand command : commands) {
+            if (!checkPermissions(sender, false)) continue;
+            
             List<String> match = Lists.newArrayList(command.getName());
             match.addAll(command.getAliases());
 
@@ -208,7 +210,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return false;
     }
 
-    private boolean checkPermissions(@NotNull CommandSender sender) {
+    private boolean checkPermissions(@NotNull CommandSender sender, boolean message) {
         if (this.permissions == null)
             return true;
 
@@ -216,7 +218,8 @@ public class AluminaCommand extends org.bukkit.command.Command {
             if (sender.hasPermission(permission))
                 return true;
         }
-        NO_PERMISSION.send(sender);
+
+        if (message) NO_PERMISSION.send(sender);
         return false;
     }
 
