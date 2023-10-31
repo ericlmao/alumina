@@ -26,9 +26,12 @@
 package games.negative.alumina.command.structure;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import games.negative.alumina.command.Command;
 import games.negative.alumina.command.Context;
+import games.negative.alumina.command.TabContext;
 import games.negative.alumina.command.builder.CommandBuilder;
 import games.negative.alumina.message.Message;
 import org.bukkit.command.CommandSender;
@@ -38,6 +41,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,6 +96,11 @@ public class AluminaCommand extends org.bukkit.command.Command {
      */
     private final boolean playerOnly;
 
+    /**
+     * Whether this command should use smart tab completion.
+     */
+    private final boolean smartTabComplete;
+
     /*
      * The parent command of this command.
      */
@@ -116,6 +125,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
         this.permissions = builder.getPermissions();
         this.params = builder.getParams();
         this.shortcuts = builder.getShortcuts();
+        this.smartTabComplete = builder.isSmartTabComplete();
 
         if (builder.getUsage() != null)
             this.setUsage(builder.getUsage());
@@ -135,6 +145,54 @@ public class AluminaCommand extends org.bukkit.command.Command {
         component.execute(context);
         return true;
     }
+
+    @NotNull
+    @Override
+    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+        TabContext context = new TabContext(sender, args);
+        List<String> completions = component.onTabComplete(context);
+        if (completions != null) return completions;
+
+        if (!smartTabComplete) return super.tabComplete(sender, alias, args);
+
+        String current = context.current();
+        int placement = args.length - 1;
+
+        List<String> result = Lists.newArrayList();
+
+        Multimap<Integer, AluminaCommand> subMap = getRecursive(this, 0);
+        if (subMap.isEmpty()) return super.tabComplete(sender, alias, args);
+
+        Collection<AluminaCommand> commands = subMap.get(placement);
+        for (AluminaCommand command : commands) {
+            List<String> match = Lists.newArrayList(command.getName());
+            match.addAll(command.getAliases());
+
+            List<String> matched = match.stream().filter(entry -> entry.toLowerCase().contains(current)).toList();
+            result.addAll(matched);
+        }
+
+        return result;
+    }
+
+    @NotNull
+    private Multimap<Integer, AluminaCommand> getRecursive(@NotNull AluminaCommand parent, int depth) {
+        Multimap<Integer, AluminaCommand> map = ArrayListMultimap.create();
+
+        List<AluminaCommand> list = parent.getSubCommands();
+        for (AluminaCommand cmd : list) {
+            int next = depth + 1;
+            map.put(depth, cmd);
+
+            Multimap<Integer, AluminaCommand> recursive = getRecursive(cmd, next);
+            if (recursive.isEmpty()) continue;
+
+            map.putAll(recursive);
+        }
+
+        return map;
+    }
+
 
     /**
      * Checks if the console is using a player-only command

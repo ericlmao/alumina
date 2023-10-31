@@ -62,6 +62,7 @@ public class CommandBuilder {
     private String[] params;
 
     private String[] shortcuts;
+    private boolean smartTabComplete;
 
     private final List<CommandBuilder> subCommands;
 
@@ -75,6 +76,7 @@ public class CommandBuilder {
         this.aliases = Lists.newArrayList();
         this.usage = "";
         this.description = "";
+        this.smartTabComplete = false;
     }
 
     /**
@@ -220,6 +222,26 @@ public class CommandBuilder {
     public CommandBuilder subcommands(CommandBuilder... commands) {
         Preconditions.checkNotNull(commands, "Command subcommands cannot be null.");
         subCommands.addAll(Arrays.asList(commands));
+        return this;
+    }
+
+    /**
+     * Set the state of the command to "smart tab complete", meaning
+     * the command will automatically tab complete the sub commands.
+     * @return The command builder.
+     */
+    public CommandBuilder smartTabComplete() {
+        return smartTabComplete(true);
+    }
+
+    /**
+     * Set the state of the command to "smart tab complete", meaning
+     * the command will automatically tab complete the sub commands.
+     * @param value The value of the smart tab complete.
+     * @return The command builder.
+     */
+    public CommandBuilder smartTabComplete(boolean value) {
+        this.smartTabComplete = value;
         return this;
     }
 

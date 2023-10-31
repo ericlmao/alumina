@@ -26,6 +26,9 @@
 package games.negative.alumina.command;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * This interface is used to mark a class as a command.
@@ -43,4 +46,15 @@ public interface Command {
      * @param context The context of the command.
      */
     void execute(@NotNull Context context);
+
+    /**
+     * This method is called when the command is tab completed.
+     * @param context The context of the command.
+     * @return a list of possible completions for the command.
+     * @apiNote This method is optional, override to add proper functionality.
+     */
+    @Nullable
+    default List<String> onTabComplete(@NotNull TabContext context) {
+        return null;
+    }
 }
