@@ -373,4 +373,46 @@ public class NumberUtil {
         };
     }
 
+    /**
+     * Condenses a number into a shorter version using suffixes.
+     * @param number Number to condense
+     * @return Condensed number
+     */
+    @NotNull
+    public static String condense(int number) {
+        if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
+
+        int exp = (int) (Math.log(number) / Math.log(1000));
+        char suffix = "kMGTPE".charAt(exp - 1);
+        return String.format("%.1f%c", number / Math.pow(1000, exp), suffix);
+    }
+
+    /**
+     * Condenses a number into a shorter version using suffixes.
+     * @param number Number to condense
+     * @return Condensed number
+     */
+    @NotNull
+    public static String condense(double number) {
+        if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
+
+        int exp = (int) (Math.log(number) / Math.log(1000));
+        char suffix = "kMGTPE".charAt(exp - 1);
+        return String.format("%.1f%c", number / Math.pow(1000, exp), suffix);
+    }
+
+    /**
+     * Condenses a number into a shorter version using suffixes.
+     * @param number Number to condense
+     * @return Condensed number
+     */
+    @NotNull
+    public static String condense(long number) {
+        if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
+
+        int exp = (int) (Math.log(number) / Math.log(1000));
+        char suffix = "kMGTPE".charAt(exp - 1);
+        return String.format("%.1f%c", number / Math.pow(1000, exp), suffix);
+    }
+
 }
