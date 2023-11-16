@@ -1,5 +1,6 @@
 package games.negative.alumina.util;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
@@ -8,7 +9,6 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +22,9 @@ public class PlayerUtil {
      * Reset the player to default properties.
      * @param player The player to reset.
      */
-    public static void reset(@NotNull Player player) {
+    public static void reset(final Player player) {
+        Preconditions.checkNotNull(player, "'player' cannot be null!");
+
         for (PotionEffect effect : player.getActivePotionEffects())
             player.removePotionEffect(effect.getType());
 
@@ -51,7 +53,9 @@ public class PlayerUtil {
      * Reset the player's health.
      * @param player The player to reset.
      */
-    private static void resetHealth(@NotNull Player player) {
+    private static void resetHealth(final Player player) {
+        Preconditions.checkNotNull(player, "'player' cannot be null!");
+
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (attribute == null) return;
 

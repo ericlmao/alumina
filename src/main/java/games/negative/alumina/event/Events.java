@@ -25,9 +25,9 @@
 
 package games.negative.alumina.event;
 
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Events utility class for more simply calling events
@@ -39,7 +39,9 @@ public class Events {
      *
      * @param event Event to call
      */
-    public static <T extends Event> void call(@NotNull T event) {
+    public static <T extends Event> void call(final T event) {
+        Preconditions.checkNotNull(event, "Event cannot be null");
+
         Bukkit.getPluginManager().callEvent(event);
     }
 

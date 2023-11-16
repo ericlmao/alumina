@@ -3,7 +3,6 @@ package games.negative.alumina.util;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +18,10 @@ public class FileLoader {
      * @param resource The name of the file to load.
      * @return The loaded file.
      */
-    public static File loadFile(@NotNull JavaPlugin plugin, @NotNull String resource) {
+    public static File loadFile(final JavaPlugin plugin, final String resource) {
+        Preconditions.checkNotNull(plugin, "Plugin cannot be null.");
+        Preconditions.checkNotNull(resource, "Resource cannot be null.");
+
         File folder = plugin.getDataFolder();
         if (!folder.exists()) folder.mkdir();
 

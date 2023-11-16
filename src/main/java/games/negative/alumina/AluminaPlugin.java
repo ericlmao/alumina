@@ -25,6 +25,7 @@
 
 package games.negative.alumina;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import games.negative.alumina.command.builder.CommandBuilder;
 import games.negative.alumina.command.structure.AluminaCommand;
@@ -36,15 +37,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -80,7 +76,9 @@ public abstract class AluminaPlugin extends JavaPlugin {
      *
      * @param builder The builder used to create the command.
      */
-    public void registerCommand(@NotNull CommandBuilder builder) {
+    public void registerCommand(final CommandBuilder builder) {
+        Preconditions.checkNotNull(builder, "Command builder cannot be null!");
+
         CommandMap commandMap = initCommandMap();
         if (commandMap == null) return;
 
@@ -117,8 +115,9 @@ public abstract class AluminaPlugin extends JavaPlugin {
      * @param parent The parent command.
      * @return A list of all subcommands.
      */
-    @NotNull
-    private List<AluminaCommand> getRecursiveSubCommand(@NotNull AluminaCommand parent) {
+    private List<AluminaCommand> getRecursiveSubCommand(final AluminaCommand parent) {
+        Preconditions.checkNotNull(parent, "Parent command cannot be null!");
+
         // Recursively get all subcommands of all subcommands.
         List<AluminaCommand> list = Lists.newArrayList(parent.getSubCommands());
 
@@ -139,7 +138,11 @@ public abstract class AluminaPlugin extends JavaPlugin {
      * @param existing The existing command.
      * @param commandMap The command map.
      */
-    private void cleanse(@NotNull String name, @NotNull Command existing, @NotNull CommandMap commandMap) {
+    private void cleanse(final String name, final Command existing, final CommandMap commandMap) {
+        Preconditions.checkNotNull(name, "Command name cannot be null!");
+        Preconditions.checkNotNull(existing, "Existing command cannot be null!");
+        Preconditions.checkNotNull(commandMap, "Command map cannot be null!");
+
         Map<String, Command> map;
         try {
             map = (Map<String, Command>) commandMap.getClass().getDeclaredMethod("getKnownCommands").invoke(commandMap);
@@ -157,7 +160,6 @@ public abstract class AluminaPlugin extends JavaPlugin {
      * This method is used to initialize the command map.
      * @return The command map.
      */
-    @Nullable
     private CommandMap initCommandMap() {
         Server server = Bukkit.getServer();
         Field field;
@@ -181,7 +183,10 @@ public abstract class AluminaPlugin extends JavaPlugin {
         return commandMap;
     }
     
-    public void registerListeners(@NotNull Listener... listeners) {
+    public void registerListeners(final Listener... listeners) {
+        Preconditions.checkNotNull(listeners, "Listeners cannot be null!");
+        Preconditions.checkArgument(listeners.length > 0, "Listeners cannot be empty!");
+
         PluginManager manager = Bukkit.getPluginManager();
 
         for (Listener listener : listeners) {
@@ -193,7 +198,7 @@ public abstract class AluminaPlugin extends JavaPlugin {
      * This method is used to load a file from the plugin's resources folder.
      * @param name The name of the file to load.
      */
-    public void loadFile(@NotNull String name) {
+    public void loadFile(final String name) {
         FileLoader.loadFile(this, name);
     }
 
@@ -221,7 +226,6 @@ public abstract class AluminaPlugin extends JavaPlugin {
         return instance;
     }
 
-    @NotNull
     public ColorAgent getColorAgent() {
         // Complete null-safety check.
         if (this.colorAgent == null)
@@ -230,7 +234,9 @@ public abstract class AluminaPlugin extends JavaPlugin {
         return colorAgent;
     }
 
-    public void setColorAgent(@NotNull ColorAgent colorAgent) {
+    public void setColorAgent(final ColorAgent colorAgent) {
+        Preconditions.checkNotNull(colorAgent, "Color Agent cannot be null!");
+
         this.colorAgent = colorAgent;
     }
 }

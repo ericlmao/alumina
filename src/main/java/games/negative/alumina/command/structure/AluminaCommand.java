@@ -38,7 +38,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,7 +55,7 @@ public class AluminaCommand extends org.bukkit.command.Command {
     private static final Message NO_PERMISSION = Message.of("&cYou do not have permission to use this command.");
 
     /*
-     * The message for when a player-only command is used as console.
+     * The message for when a player-only command is used as a console.
      */
     private static final Message CANNOT_USE_AS_CONSOLE = Message.of("&cYou cannot use this command as console.");
 
@@ -112,8 +111,10 @@ public class AluminaCommand extends org.bukkit.command.Command {
      * @param parent  The parent command.
      * @param builder The command builder.
      */
-    public AluminaCommand(@Nullable AluminaCommand parent, @NotNull CommandBuilder builder) {
+    public AluminaCommand(final AluminaCommand parent, final CommandBuilder builder) {
         super(builder.getName(), builder.getDescription(), builder.getUsage(), builder.getAliases());
+
+        Preconditions.checkNotNull(builder, "Command builder cannot be null.");
 
         this.parent = parent;
 
@@ -177,8 +178,9 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return result;
     }
 
-    @NotNull
-    private Multimap<Integer, AluminaCommand> getRecursive(@NotNull AluminaCommand parent, int depth) {
+    private Multimap<Integer, AluminaCommand> getRecursive(final AluminaCommand parent, final int depth) {
+        Preconditions.checkNotNull(parent, "Parent command cannot be null.");
+
         Multimap<Integer, AluminaCommand> map = ArrayListMultimap.create();
 
         List<AluminaCommand> list = parent.getSubCommands();
@@ -201,7 +203,9 @@ public class AluminaCommand extends org.bukkit.command.Command {
      * @param sender The sender
      * @return Whether the console is using a player-only command
      */
-    private boolean checkConsolePlayerCommand(@NotNull CommandSender sender) {
+    private boolean checkConsolePlayerCommand(final CommandSender sender) {
+        Preconditions.checkNotNull(sender, "Sender cannot be null.");
+
         if (!(sender instanceof Player) && playerOnly) {
             CANNOT_USE_AS_CONSOLE.send(sender);
             return true;
@@ -210,7 +214,9 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return false;
     }
 
-    private boolean checkPermissions(@NotNull CommandSender sender, boolean message) {
+    private boolean checkPermissions(final CommandSender sender, final boolean message) {
+        Preconditions.checkNotNull(sender, "Sender cannot be null.");
+
         if (this.permissions == null)
             return true;
 
@@ -223,7 +229,10 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return false;
     }
 
-    private boolean checkSubCommands(@NotNull CommandSender sender, @NotNull String[] args) {
+    private boolean checkSubCommands(final CommandSender sender, final String[] args) {
+        Preconditions.checkNotNull(sender, "Sender cannot be null.");
+        Preconditions.checkNotNull(args, "Arguments cannot be null.");
+
         if (args.length == 0 || subCommands.isEmpty())
             return false;
 
@@ -234,8 +243,9 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return (subCommand != null && subCommand.execute(sender, begin, snippet));
     }
 
-    @Nullable
-    public AluminaCommand getAvailableSubCommand(@NotNull String argument) {
+    public AluminaCommand getAvailableSubCommand(final String argument) {
+        Preconditions.checkNotNull(argument, "Argument cannot be null.");
+
         for (AluminaCommand subCommand : subCommands) {
             if (subCommand.getName().equalsIgnoreCase(argument) || subCommand.getAliases().contains(argument.toLowerCase()))
                 return subCommand;
@@ -243,7 +253,10 @@ public class AluminaCommand extends org.bukkit.command.Command {
         return null;
     }
 
-    public boolean checkParams(@NotNull CommandSender sender, @NotNull String[] args) {
+    public boolean checkParams(final CommandSender sender, final String[] args) {
+        Preconditions.checkNotNull(sender, "Sender cannot be null.");
+        Preconditions.checkNotNull(args, "Arguments cannot be null.");
+
         if (this.params == null)
             return true;
 

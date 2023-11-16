@@ -1,17 +1,15 @@
 package games.negative.alumina.util;
 
-import lombok.experimental.UtilityClass;
+import com.google.common.base.Preconditions;
 import org.bukkit.NamespacedKey;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * This is a class used to reduce boilerplate when working with persistent data.
  */
-@UtilityClass
 public class NBTEditor {
 
     /**
@@ -24,8 +22,11 @@ public class NBTEditor {
      * @param <T>    The type of the holder.
      * @return The value, or null if it does not exist.
      */
-    @Nullable
-    public <V, T extends PersistentDataHolder> V get(@NotNull T holder, @NotNull NamespacedKey key, @NotNull PersistentDataType<V, V> type) {
+    public static <V, T extends PersistentDataHolder> V get(final T holder, final NamespacedKey key, final PersistentDataType<V, V> type) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+        Preconditions.checkNotNull(type, "'type' cannot be null!");
+
         PersistentDataContainer container = holder.getPersistentDataContainer();
         if (!container.has(key, type)) return null;
 
@@ -44,7 +45,12 @@ public class NBTEditor {
      * @return The value, or the default value if it does not exist.
      */
     @NotNull
-    public <V, T extends PersistentDataHolder> V getOrDefault(@NotNull T holder, @NotNull NamespacedKey key, @NotNull PersistentDataType<V, V> type, @NotNull V def) {
+    public static <V, T extends PersistentDataHolder> V getOrDefault(final T holder, final NamespacedKey key, final PersistentDataType<V, V> type, final V def) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+        Preconditions.checkNotNull(type, "'type' cannot be null!");
+        Preconditions.checkNotNull(def, "'def' cannot be null!");
+
         V value = get(holder, key, type);
         return value == null ? def : value;
     }
@@ -56,7 +62,10 @@ public class NBTEditor {
      * @param key    The key to remove the value from.
      * @param <T>    The type of the holder.
      */
-    public <T extends PersistentDataHolder> void remove(@NotNull T holder, @NotNull NamespacedKey key) {
+    public static <T extends PersistentDataHolder> void remove(final T holder, final NamespacedKey key) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+
         PersistentDataContainer container = holder.getPersistentDataContainer();
         container.remove(key);
     }
@@ -71,7 +80,12 @@ public class NBTEditor {
      * @param <V>    The type of the value.
      * @param <T>    The type of the holder.
      */
-    public <V, T extends PersistentDataHolder> void set(@NotNull T holder, @NotNull NamespacedKey key, @NotNull PersistentDataType<V, V> type, @NotNull V value) {
+    public static <V, T extends PersistentDataHolder> void set(final T holder, final NamespacedKey key, final PersistentDataType<V, V> type, final V value) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+        Preconditions.checkNotNull(type, "'type' cannot be null!");
+        Preconditions.checkNotNull(value, "'value' cannot be null!");
+
         PersistentDataContainer container = holder.getPersistentDataContainer();
         container.set(key, type, value);
     }
@@ -86,7 +100,11 @@ public class NBTEditor {
      * @param <T>    The type of the holder.
      * @return If the holder has the value.
      */
-    public <V, T extends PersistentDataHolder> boolean has(@NotNull T holder, @NotNull NamespacedKey key, @NotNull PersistentDataType<V, V> type) {
+    public static <V, T extends PersistentDataHolder> boolean has(final T holder, final NamespacedKey key, final PersistentDataType<V, V> type) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+        Preconditions.checkNotNull(type, "'type' cannot be null!");
+
         PersistentDataContainer container = holder.getPersistentDataContainer();
         return container.has(key, type);
     }
@@ -99,7 +117,10 @@ public class NBTEditor {
      * @param <T>    The type of the holder.
      * @return If the holder has the value.
      */
-    public <T extends PersistentDataHolder> boolean has(@NotNull T holder, @NotNull NamespacedKey key) {
+    public static <T extends PersistentDataHolder> boolean has(final T holder, final NamespacedKey key) {
+        Preconditions.checkNotNull(holder, "'holder' cannot be null!");
+        Preconditions.checkNotNull(key, "'key' cannot be null!");
+
         PersistentDataContainer container = holder.getPersistentDataContainer();
         return container.getKeys().contains(key);
     }

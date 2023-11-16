@@ -1,13 +1,12 @@
 package games.negative.alumina.util;
 
-import lombok.SneakyThrows;
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
-import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
@@ -25,7 +24,9 @@ public class InventoryUtil {
      * @return A {@link String} array, the first element is the main content, the second element is the armor.
      * @throws IllegalStateException If the inventory cannot be converted.
      */
-    public String[] playerInventoryToBase64(@NotNull PlayerInventory playerInventory) throws IllegalStateException {
+    public String[] playerInventoryToBase64(final PlayerInventory playerInventory) throws IllegalStateException {
+        Preconditions.checkNotNull(playerInventory, "Player inventory cannot be null.");
+
         //get the main content part, this doesn't return the armor
         String content = inventoryToBase64(playerInventory);
         String armor = itemStackArrayToBase64(playerInventory.getArmorContents());
@@ -39,7 +40,9 @@ public class InventoryUtil {
      * @return The base64 string.
      * @throws IllegalStateException If the item stack array cannot be converted.
      */
-    public String itemStackArrayToBase64(@NotNull ItemStack[] items) throws IllegalStateException {
+    public String itemStackArrayToBase64(final ItemStack[] items) throws IllegalStateException {
+        Preconditions.checkNotNull(items, "Item stack array cannot be null.");
+
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
@@ -66,7 +69,9 @@ public class InventoryUtil {
      * @return The base64 string.
      * @throws IllegalStateException If the inventory cannot be converted.
      */
-    public String inventoryToBase64(@NotNull Inventory inventory) throws IllegalStateException {
+    public String inventoryToBase64(final Inventory inventory) throws IllegalStateException {
+        Preconditions.checkNotNull(inventory, "Inventory cannot be null.");
+
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
@@ -93,8 +98,8 @@ public class InventoryUtil {
      * @return The inventory.
      * @throws IllegalStateException If the base64 string cannot be converted.
      */
-    @SneakyThrows
-    public Inventory inventoryFromBase64(@NotNull String data) throws IllegalStateException {
+    public Inventory inventoryFromBase64(final String data) throws IllegalStateException, IOException {
+        Preconditions.checkNotNull(data, "Base64 string cannot be null.");
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
@@ -109,6 +114,8 @@ public class InventoryUtil {
             return inventory;
         } catch (ClassNotFoundException e) {
             throw new IOException("Unable to decode class type.", e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -118,8 +125,9 @@ public class InventoryUtil {
      * @return The item stack array.
      * @throws IllegalStateException If the base64 string cannot be converted.
      */
-    @SneakyThrows
-    public ItemStack[] itemStackArrayFromBase64(@NotNull String data) throws IllegalStateException {
+    public ItemStack[] itemStackArrayFromBase64(final String data) throws IllegalStateException, IOException {
+        Preconditions.checkNotNull(data, "Base64 string cannot be null.");
+
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
@@ -134,6 +142,8 @@ public class InventoryUtil {
             return items;
         } catch (ClassNotFoundException e) {
             throw new IOException("Unable to decode class type.", e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

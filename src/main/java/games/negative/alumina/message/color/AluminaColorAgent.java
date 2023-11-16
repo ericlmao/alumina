@@ -1,7 +1,7 @@
 package games.negative.alumina.message.color;
 
+import com.google.common.base.Preconditions;
 import net.md_5.bungee.api.ChatColor;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +28,9 @@ public class AluminaColorAgent implements ColorAgent {
     }
 
     @Override
-    public @NotNull String translate(@NotNull String input) {
+    public String translate(String input) {
+        Preconditions.checkNotNull(input, "input cannot be null!");
+
         Matcher matcher = PATTERN.matcher(input);
         while (matcher.find()) {
             String color = input.substring(matcher.start(), matcher.end());

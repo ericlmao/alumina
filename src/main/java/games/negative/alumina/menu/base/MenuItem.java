@@ -28,13 +28,11 @@
 package games.negative.alumina.menu.base;
 
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a menu item.
  * @param item The item.
  * @param key The function key.
  */
-public record MenuItem(@NotNull ItemStack item, @Nullable String key) {
+public record MenuItem(ItemStack item, String key) {
 }

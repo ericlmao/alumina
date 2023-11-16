@@ -1,19 +1,16 @@
 package games.negative.alumina.util;
 
 import com.google.common.base.Preconditions;
-import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 /**
- * A location utility to handle some location related tasks.
+ * A location utility to handle some location-related tasks.
  */
-@UtilityClass
 public class LocationUtil {
 
     /**
@@ -22,8 +19,9 @@ public class LocationUtil {
      * @param location The location to convert.
      * @return The yaml map.
      */
-    @NotNull
-    public Map<String, Object> toYaml(@NotNull Location location) {
+    public static Map<String, Object> toYaml(final Location location) {
+        Preconditions.checkNotNull(location, "Location cannot be null!");
+
         World world = location.getWorld();
         Preconditions.checkNotNull(world, "World cannot be null!");
 
@@ -43,8 +41,9 @@ public class LocationUtil {
      * @param section The section to convert.
      * @return The location.
      */
-    @NotNull
-    public Location fromYaml(@NotNull ConfigurationSection section) {
+    public static Location fromYaml(final ConfigurationSection section) {
+        Preconditions.checkNotNull(section, "Section cannot be null!");
+
         World world = Bukkit.getWorld(section.getString("world", "world"));
         Preconditions.checkNotNull(world, "World cannot be null!");
 
@@ -64,8 +63,9 @@ public class LocationUtil {
      * @param map The map to convert.
      * @return The location.
      */
-    @NotNull
-    public Location fromYaml(@NotNull Map<String, Object> map) {
+    public static Location fromYaml(final Map<String, Object> map) {
+        Preconditions.checkNotNull(map, "Map cannot be null!");
+
         World world = Bukkit.getWorld((String) map.get("world"));
         Preconditions.checkNotNull(world, "World cannot be null!");
 
@@ -87,7 +87,11 @@ public class LocationUtil {
      * @param max      The maximum location of the cuboid.
      * @return Whether the location is inside the cuboid.
      */
-    public boolean isInside(@NotNull Location location, @NotNull Location min, @NotNull Location max) {
+    public static boolean isInside(final Location location, final Location min, final Location max) {
+        Preconditions.checkNotNull(location, "'location' cannot be null!");
+        Preconditions.checkNotNull(min, "'min' cannot be null!");
+        Preconditions.checkNotNull(max, "'max' cannot be null!");
+
         World locationWorld = location.getWorld();
         World minWorld = min.getWorld();
         World maxWorld = max.getWorld();

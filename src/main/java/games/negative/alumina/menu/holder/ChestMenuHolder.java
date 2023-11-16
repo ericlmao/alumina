@@ -27,6 +27,7 @@
 
 package games.negative.alumina.menu.holder;
 
+import com.google.common.base.Preconditions;
 import games.negative.alumina.menu.ChestMenu;
 import games.negative.alumina.menu.base.AluminaMenu;
 import games.negative.alumina.menu.base.AluminaMenuHolder;
@@ -47,17 +48,23 @@ public class ChestMenuHolder implements AluminaMenuHolder<ChestMenu> {
     private final ChestMenu gui;
     private Inventory inventory;
 
-    public ChestMenuHolder(@NotNull ChestMenu gui) {
+    public ChestMenuHolder(final ChestMenu gui) {
         this.gui = gui;
     }
 
     @Override
-    public void onOpen(@NotNull Player player, @NotNull InventoryOpenEvent event) {
+    public void onOpen(final Player player, final InventoryOpenEvent event) {
+        Preconditions.checkNotNull(player, "player cannot be null");
+        Preconditions.checkNotNull(event, "event cannot be null");
+
         gui.onOpen(player, event);
     }
 
     @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent event) {
+    public void onClose(final Player player, final InventoryCloseEvent event) {
+        Preconditions.checkNotNull(player, "player cannot be null");
+        Preconditions.checkNotNull(event, "event cannot be null");
+
         gui.onClose(player, event);
     }
 

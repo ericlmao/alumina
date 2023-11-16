@@ -1,5 +1,6 @@
 package games.negative.alumina.model.position;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import games.negative.alumina.util.LocationUtil;
 import org.bukkit.Location;
@@ -24,7 +25,14 @@ import java.util.function.Predicate;
  * @param min The minimum block position.
  * @param max The maximum block position.
  */
-public record BlockRegion(@NotNull String name, @NotNull World world, @NotNull BlockPosition min, @NotNull BlockPosition max) implements ConfigurationSerializable {
+public record BlockRegion(String name, World world, BlockPosition min, BlockPosition max) implements ConfigurationSerializable {
+
+    public BlockRegion {
+        Preconditions.checkNotNull(name, "Name cannot be null.");
+        Preconditions.checkNotNull(world, "World cannot be null.");
+        Preconditions.checkNotNull(min, "Min cannot be null.");
+        Preconditions.checkNotNull(max, "Max cannot be null.");
+    }
 
     /**
      * Check if a location is inside the region.

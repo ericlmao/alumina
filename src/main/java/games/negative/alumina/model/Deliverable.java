@@ -1,7 +1,5 @@
 package games.negative.alumina.model;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  * Represents a piece of content that can be sent to a receiver.
  * @param <T> The type of the receiver.
@@ -13,6 +11,6 @@ public interface Deliverable<T> {
      * Sends the content to the receiver.
      * @param receiver The receiver of the content.
      */
-    void send(@NotNull T receiver);
+    void send(final T receiver);
 
 }

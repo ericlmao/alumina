@@ -25,11 +25,10 @@
 
 package games.negative.alumina.command;
 
+import com.google.common.base.Preconditions;
 import games.negative.alumina.message.Message;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -39,18 +38,7 @@ import java.util.Optional;
  * @param args The arguments of the command
  * @param sender The sender of the command
  */
-public record Context(@NotNull String[] args, @NotNull CommandSender sender) {
-
-    /**
-     * Returns the player who executed the command.
-     * @throws NullPointerException if the sender is not a player.
-     * @return the player who executed the command.
-     */
-    @Deprecated
-    @Nullable
-    public Player getPlayer() {
-        return sender() instanceof Player ? (Player) sender() : null;
-    }
+public record Context(String[] args, CommandSender sender) {
 
     /**
      * Returns the player who executed the command.
@@ -65,8 +53,7 @@ public record Context(@NotNull String[] args, @NotNull CommandSender sender) {
      * @param index The index of the argument.
      * @return the argument at the specified index.
      */
-    @NotNull
-    public Optional<String> argument(int index) {
+    public Optional<String> argument(final int index) {
         return (index >= args.length ? Optional.empty() : Optional.of(args[index]));
     }
 
@@ -74,7 +61,9 @@ public record Context(@NotNull String[] args, @NotNull CommandSender sender) {
      * Send a message to the sender of the command.
      * @param message The message to send.
      */
-    public void message(@NotNull String message) {
+    public void message(final String message) {
+        Preconditions.checkNotNull(message, "message cannot be null");
+
         sender().sendMessage(message);
     }
 
@@ -82,7 +71,9 @@ public record Context(@NotNull String[] args, @NotNull CommandSender sender) {
      * Send a message to the sender of the command.
      * @param message The message to send.
      */
-    public void message(@NotNull Message message) {
+    public void message(final Message message) {
+        Preconditions.checkNotNull(message, "message cannot be null");
+
         message.send(sender());
     }
 }

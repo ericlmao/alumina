@@ -83,7 +83,10 @@ public class TimeUtil {
      * @param input Input string
      * @return Formatted time
      */
-    public static long fromString(@NotNull String input) {
+    public static long fromString(final String input) {
+        Preconditions.checkNotNull(input, "'input' cannot be null!");
+        Preconditions.checkArgument(!input.isEmpty(), "'input' cannot be empty!");
+
         StringBuilder builder = new StringBuilder();
         int seconds = 0;
         int minutes = 0;
@@ -138,11 +141,13 @@ public class TimeUtil {
     private static class TimeFormatter {
         private final LinkedList<String> entries = new LinkedList<>();
 
-        public TimeFormatter(@NotNull String... entries) {
+        public TimeFormatter(final String... entries) {
+            Preconditions.checkNotNull(entries, "'entries' cannot be null!");
+
             this.entries.addAll(Arrays.asList(entries));
         }
 
-        @NotNull
+
         public String toString() {
             StringBuilder builder = new StringBuilder();
             for (String entry : entries) {

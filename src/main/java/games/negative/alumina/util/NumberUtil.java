@@ -27,8 +27,7 @@
 
 package games.negative.alumina.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.google.common.base.Preconditions;
 
 import java.text.DecimalFormat;
 
@@ -108,7 +107,9 @@ public class NumberUtil {
      * @param text Text to check
      * @return If the text is a {@link Integer}
      */
-    public static boolean isInteger(@NotNull String text) {
+    public static boolean isInteger(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         try {
             Integer.parseInt(text);
             return true;
@@ -124,8 +125,9 @@ public class NumberUtil {
      * @return {@link Integer} from the text
      * @throws NullPointerException If the text is not an {@link Integer}
      */
-    @Nullable
-    public static Integer getInteger(@NotNull String text) {
+    public static Integer getInteger(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         if (!isInteger(text)) return null;
 
         return Integer.parseInt(text);
@@ -137,7 +139,9 @@ public class NumberUtil {
      * @param text Text to check
      * @return If the text is a {@link Long}
      */
-    public static boolean isLong(@NotNull String text) {
+    public static boolean isLong(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         try {
             Long.parseLong(text);
             return true;
@@ -153,8 +157,9 @@ public class NumberUtil {
      * @return {@link Long} from the text
      * @throws NullPointerException If the text is not an {@link Long}
      */
-    @Nullable
-    public static Long getLong(@NotNull String text) {
+    public static Long getLong(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         if (!isLong(text)) return null;
 
         return Long.parseLong(text);
@@ -166,7 +171,9 @@ public class NumberUtil {
      * @param text Text to check
      * @return If the text is a {@link Double}
      */
-    public static boolean isDouble(@NotNull String text) {
+    public static boolean isDouble(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         try {
             Double.parseDouble(text);
             return true;
@@ -182,8 +189,9 @@ public class NumberUtil {
      * @return {@link Double} from the text
      * @throws NullPointerException If the text is not an {@link Double}
      */
-    @Nullable
-    public static Double getDouble(@NotNull String text) {
+    public static Double getDouble(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         if (!isDouble(text)) return null;
 
         return Double.parseDouble(text);
@@ -195,7 +203,9 @@ public class NumberUtil {
      * @param text Text to check
      * @return If the text is a {@link Float}
      */
-    public static boolean isFloat(@NotNull String text) {
+    public static boolean isFloat(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         try {
             Float.parseFloat(text);
             return true;
@@ -211,8 +221,9 @@ public class NumberUtil {
      * @return {@link Float} from the text
      * @throws NullPointerException If the text is not an {@link Float}
      */
-    @Nullable
-    public static Float getFloat(@NotNull String text) {
+    public static Float getFloat(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         if (!isFloat(text)) return null;
 
         return Float.parseFloat(text);
@@ -224,7 +235,9 @@ public class NumberUtil {
      * @param text Text to check
      * @return If the text is a {@link Short}
      */
-    public static boolean isShort(@NotNull String text) {
+    public static boolean isShort(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         try {
             Short.parseShort(text);
             return true;
@@ -240,8 +253,9 @@ public class NumberUtil {
      * @return {@link Short} from the text
      * @throws NullPointerException If the text is not an {@link Short}
      */
-    @Nullable
-    public static Short getShort(@NotNull String text) {
+    public static Short getShort(final String text) {
+        Preconditions.checkNotNull(text, "'text' cannot be null!");
+
         if (!isShort(text)) return null;
 
         return Short.parseShort(text);
@@ -254,7 +268,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(int number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return decimalFormat(number) + "th";
@@ -275,7 +288,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(long number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return decimalFormat(number) + "th";
@@ -296,7 +308,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(double number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return decimalFormat(number) + "th";
@@ -317,7 +328,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(float number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return number + "th";
@@ -338,7 +348,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(short number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return decimalFormat(number) + "th";
@@ -359,7 +368,6 @@ public class NumberUtil {
      * @param number Number to convert
      * @return Fancy version of the number
      */
-    @NotNull
     public static String fancy(byte number) {
         if (number % 100 >= 11 && number % 100 <= 13) {
             return decimalFormat(number) + "th";
@@ -378,7 +386,6 @@ public class NumberUtil {
      * @param number Number to condense
      * @return Condensed number
      */
-    @NotNull
     public static String condense(int number) {
         if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
 
@@ -392,7 +399,6 @@ public class NumberUtil {
      * @param number Number to condense
      * @return Condensed number
      */
-    @NotNull
     public static String condense(double number) {
         if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
 
@@ -406,7 +412,6 @@ public class NumberUtil {
      * @param number Number to condense
      * @return Condensed number
      */
-    @NotNull
     public static String condense(long number) {
         if (number < 1000) return String.valueOf(number); // Return the number itself if less than 1000.
 

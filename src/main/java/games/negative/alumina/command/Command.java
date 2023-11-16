@@ -25,9 +25,6 @@
 
 package games.negative.alumina.command;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 /**
@@ -45,7 +42,7 @@ public interface Command {
      * This method is called when the command is executed.
      * @param context The context of the command.
      */
-    void execute(@NotNull Context context);
+    void execute(Context context);
 
     /**
      * This method is called when the command is tab completed.
@@ -53,8 +50,7 @@ public interface Command {
      * @return a list of possible completions for the command.
      * @apiNote This method is optional, override to add proper functionality.
      */
-    @Nullable
-    default List<String> onTabComplete(@NotNull TabContext context) {
+    default List<String> onTabComplete(TabContext context) {
         return null;
     }
 }

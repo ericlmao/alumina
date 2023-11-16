@@ -47,13 +47,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
-import java.util.logging.Logger;
 
 /**
  * Represents a intractable chest menu.
@@ -76,7 +73,8 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param rows The amount of rows the menu should have.
      * @apiNote The number of rows must be greater than 0 and less than or equal to 6.
      */
-    public ChestMenu(@NotNull String title, int rows) {
+    public ChestMenu(final String title, final int rows) {
+        Preconditions.checkNotNull(title, "title cannot be null");
         Preconditions.checkArgument(MathUtil.between(rows, 1, 6), "Rows must be greater than 0 and less than or equal to 6.");
 
         this.rows = rows;
@@ -103,7 +101,9 @@ public abstract class ChestMenu implements AluminaMenu {
      *                    When the function key is null, the item will not be functional.
      */
     @Override
-    public void setItem(int slot, @NotNull ItemStack item, @Nullable String functionKey) {
+    public void setItem(final int slot, final ItemStack item, final String functionKey) {
+        Preconditions.checkNotNull(item, "item cannot be null");
+
         if (this.freeSlots != null)
             this.freeSlots.remove(slot);
 
@@ -127,7 +127,9 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param functionKey The function key to set.
      */
     @Override
-    public void addItem(@NotNull ItemStack item, @Nullable String functionKey) {
+    public void addItem(final ItemStack item, final String functionKey) {
+        Preconditions.checkNotNull(item, "item cannot be null");
+
         // We're using a set to store the free slots, so we do not need to loop through the entire inventory
         // whenever we need to find a free slot.
         // Even tho in the grand scheme of things, it's a micro-performance boost, it's still a boost, I guess.
@@ -152,7 +154,9 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param item The item.
      * @param key The function key.
      */
-    private void applyFunction(@NotNull ItemStack item, @Nullable String key) {
+    private void applyFunction(final ItemStack item, final String key) {
+        Preconditions.checkNotNull(item, "item cannot be null");
+
         if (key == null) return;
 
         ItemMeta meta = item.getItemMeta();
@@ -168,7 +172,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param slot The slot to clear.
      */
     @Override
-    public void clearSlot(int slot) {
+    public void clearSlot(final int slot) {
         inventory.clear(slot);
 
         if (freeSlots != null && !freeSlots.contains(slot)) freeSlots.add(slot);
@@ -183,8 +187,10 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param player The player to open the menu for.
      */
     @Override
-    public void open(@NotNull Player player) {
-        refresh(player);
+    public void open(final Player player) {
+        Preconditions.checkNotNull(player, "player cannot be null");
+
+        refresh();
 
         player.openInventory(inventory);
     }
@@ -193,7 +199,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * This method will allow you to refresh the menu.
      */
     @Override
-    public void refresh(@Nullable Player player) {
+    public void refresh() {
         if (inventory == null) this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), (rows * 9), ColorUtil.translate(title));
 
         inventory.clear();
@@ -209,7 +215,9 @@ public abstract class ChestMenu implements AluminaMenu {
      * This method will allow you to set the menu title.
      * @param title The title to set.
      */
-    public void setTitle(@NotNull String title) {
+    public void setTitle(final String title) {
+        Preconditions.checkNotNull(title, "title cannot be null");
+
         this.title = title;
 
         updateTitle();
@@ -232,7 +240,7 @@ public abstract class ChestMenu implements AluminaMenu {
         }
     }
 
-    public void setRows(int rows) {
+    public void setRows(final int rows) {
         Preconditions.checkArgument(MathUtil.between(rows, 1, 6), "Rows must be greater than 0 and less than or equal to 6.");
 
         this.rows = rows;
@@ -244,7 +252,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param event  The event.
      */
     @Override
-    public void onClick(@NotNull Player player, @NotNull InventoryClickEvent event) {
+    public void onClick(final Player player, final InventoryClickEvent event) {
         // Override this method to handle clicks.
     }
 
@@ -256,7 +264,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * @deprecated Use {@link #onFunctionClick(Player, String, InventoryClickEvent)} instead.
      */
     @Override
-    public void onFunctionClick(@NotNull Player player, @NotNull MenuItem item, @NotNull InventoryClickEvent event) {
+    public void onFunctionClick(final Player player, final MenuItem item, final InventoryClickEvent event) {
         // Override this method to handle function clicks.
     }
 
@@ -277,7 +285,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param event  The event.
      */
     @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent event) {
+    public void onClose(final Player player, InventoryCloseEvent event) {
         // Override this method to handle close.
     }
 
@@ -287,7 +295,7 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param event  The event.
      */
     @Override
-    public void onOpen(@NotNull Player player, @NotNull InventoryOpenEvent event) {
+    public void onOpen(final Player player, final InventoryOpenEvent event) {
         // Override this method to handle open.
     }
 
@@ -320,7 +328,6 @@ public abstract class ChestMenu implements AluminaMenu {
      * @param key The function key.
      * @return The menu item.
      */
-    @Nullable
     public MenuItem byKey(@NotNull String key) {
         return byKey.getOrDefault(key, null);
     }

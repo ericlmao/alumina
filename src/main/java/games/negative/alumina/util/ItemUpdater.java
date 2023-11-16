@@ -1,8 +1,8 @@
 package games.negative.alumina.util;
 
+import com.google.common.base.Preconditions;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -17,7 +17,10 @@ public class ItemUpdater {
      * @param item Item to update
      * @param processor Processor to use
      */
-    public static void of(@NotNull ItemStack item, @NotNull Consumer<ItemMeta> processor) {
+    public static void of(final ItemStack item, final Consumer<ItemMeta> processor) {
+        Preconditions.checkNotNull(item, "item cannot be null!");
+        Preconditions.checkNotNull(processor, "processor cannot be null!");
+
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
@@ -32,7 +35,11 @@ public class ItemUpdater {
      * @param processor Processor to use
      * @param <T> Type of the ItemMeta
      */
-    public static <T extends ItemMeta> void of(@NotNull ItemStack item, @NotNull Class<T> type, @NotNull Consumer<T> processor) {
+    public static <T extends ItemMeta> void of(final ItemStack item, final Class<T> type, final Consumer<T> processor) {
+        Preconditions.checkNotNull(item, "item cannot be null!");
+        Preconditions.checkNotNull(type, "type cannot be null!");
+        Preconditions.checkNotNull(processor, "processor cannot be null!");
+
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 

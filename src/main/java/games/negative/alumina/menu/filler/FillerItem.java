@@ -27,14 +27,14 @@
 
 package games.negative.alumina.menu.filler;
 
+import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 
 /**
- * This class represents an item that is used to fill empty spaces in a menu.
+ * This class represents an item used to fill empty spaces in a menu.
  */
 public class FillerItem extends ItemStack {
 
@@ -62,8 +62,10 @@ public class FillerItem extends ItemStack {
         BLACK, WHITE, ORANGE, MAGENTA, LIGHT_BLUE, YELLOW, LIME, PINK, GRAY, LIGHT_GRAY, CYAN, PURPLE, BLUE, BROWN, GREEN, RED
     };
 
-    public FillerItem(@NotNull Material type) {
+    public FillerItem(final Material type) {
         super(type);
+
+        Preconditions.checkNotNull(type, "Material cannot be null");
 
         ItemMeta meta = Bukkit.getItemFactory().getItemMeta(type);
         if (meta == null) throw new IllegalStateException("ItemMeta is null");
@@ -85,7 +87,9 @@ public class FillerItem extends ItemStack {
      * @param name the name of the filler item.
      * @return the filler item with the given name.
      */
-    public static FillerItem valueOf(@NotNull String name) {
+    public static FillerItem valueOf(final String name) {
+        Preconditions.checkNotNull(name, "Name cannot be null");
+
         for (FillerItem item : values) {
             if (item.getType().name().equalsIgnoreCase(name)) {
                 return item;
@@ -99,7 +103,9 @@ public class FillerItem extends ItemStack {
      * @param material the material of the filler item.
      * @return the filler item with the given material.
      */
-    public static FillerItem valueOf(@NotNull Material material) {
+    public static FillerItem valueOf(final Material material) {
+        Preconditions.checkNotNull(material, "Material cannot be null");
+
         for (FillerItem item : values) {
             if (item.getType().equals(material)) {
                 return item;

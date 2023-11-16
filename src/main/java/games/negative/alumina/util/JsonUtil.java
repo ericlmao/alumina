@@ -1,9 +1,8 @@
 package games.negative.alumina.util;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
@@ -22,7 +21,10 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be saved.
      */
-    public static <T> void save(@NotNull T instance, @NotNull File file, @Nullable Gson gson) throws IOException {
+    public static <T> void save(final T instance, final File file, Gson gson) throws IOException {
+        Preconditions.checkNotNull(instance, "Instance cannot be null!");
+        Preconditions.checkNotNull(file, "File cannot be null!");
+
         if (gson == null) gson = GSON;
 
         file.getParentFile().mkdirs();
@@ -43,7 +45,10 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be saved.
      */
-    public static <T> void save(@NotNull T instance, @NotNull File file) throws IOException {
+    public static <T> void save(final T instance, final File file) throws IOException {
+        Preconditions.checkNotNull(instance, "Instance cannot be null!");
+        Preconditions.checkNotNull(file, "File cannot be null!");
+
         save(instance, file, null);
     }
 
@@ -57,8 +62,11 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be loaded.
      */
-    @NotNull
-    public static <T> T loadOrCreate(@NotNull File file, @NotNull Class<T> clazz, @NotNull T clean, @Nullable Gson gson) throws IOException {
+    public static <T> T loadOrCreate(final File file, final Class<T> clazz, final T clean, final Gson gson) throws IOException {
+        Preconditions.checkNotNull(file, "File cannot be null!");
+        Preconditions.checkNotNull(clazz, "Class cannot be null!");
+        Preconditions.checkNotNull(clean, "Clean instance cannot be null!");
+
         if (!file.exists()) {
             save(clean, file, gson);
             return clean;
@@ -77,8 +85,11 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be loaded.
      */
-    @NotNull
-    public static <T> T loadOrCreate(@NotNull File file, @NotNull Class<T> clazz, @NotNull T clean) throws IOException {
+    public static <T> T loadOrCreate(final File file, final Class<T> clazz, final T clean) throws IOException {
+        Preconditions.checkNotNull(file, "File cannot be null!");
+        Preconditions.checkNotNull(clazz, "Class cannot be null!");
+        Preconditions.checkNotNull(clean, "Clean instance cannot be null!");
+
         return loadOrCreate(file, clazz, clean, null);
     }
 
@@ -91,8 +102,10 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be loaded.
      */
-    @NotNull
-    public static <T> T load(@NotNull File file, @NotNull Class<T> clazz, @Nullable Gson gson) throws IOException {
+    public static <T> T load(final File file, final Class<T> clazz, Gson gson) throws IOException {
+        Preconditions.checkNotNull(file, "File cannot be null!");
+        Preconditions.checkNotNull(clazz, "Class cannot be null!");
+
         if (gson == null) gson = GSON;
 
         file.getParentFile().mkdirs();
@@ -113,8 +126,10 @@ public class JsonUtil {
      * @param <T> The type of the object.
      * @throws IOException If the file could not be loaded.
      */
-    @NotNull
-    public static <T> T load(@NotNull File file, @NotNull Class<T> clazz) throws IOException {
+    public static <T> T load(final File file, final Class<T> clazz) throws IOException {
+        Preconditions.checkNotNull(file, "File cannot be null!");
+        Preconditions.checkNotNull(clazz, "Class cannot be null!");
+
         return load(file, clazz, null);
     }
 }

@@ -34,8 +34,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents the base class for all custom menus.
@@ -55,7 +53,7 @@ public interface AluminaMenu {
      * @param functionKey The function key to set.
      *                    When the function key is null, the item will not be functional.
      */
-    void setItem(int slot, @NotNull ItemStack item, @Nullable String functionKey);
+    void setItem(int slot, final ItemStack item, final String functionKey);
 
     /**
      * This method will allow you to set a non-functional item in the menu.
@@ -63,7 +61,7 @@ public interface AluminaMenu {
      * @param slot The slot to set the item in.
      * @param item The item to set.
      */
-    default void setItem(int slot, @NotNull ItemStack item) {
+    default void setItem(final int slot, final ItemStack item) {
         setItem(slot, item, null);
     }
 
@@ -72,13 +70,13 @@ public interface AluminaMenu {
      * @param item The item to add.
      * @param functionKey The function key to set.
      */
-    void addItem(@NotNull ItemStack item, @Nullable String functionKey);
+    void addItem(final ItemStack item, final String functionKey);
 
     /**
      * This method will allow you to add a non-functional item to the menu.
      * @param item The item to add.
      */
-    default void addItem(@NotNull ItemStack item) {
+    default void addItem(final ItemStack item) {
         addItem(item, null);
     }
 
@@ -87,19 +85,19 @@ public interface AluminaMenu {
      *
      * @param slot The slot to clear.
      */
-    void clearSlot(int slot);
+    void clearSlot(final int slot);
 
     /**
      * This method will allow you to open the menu for a player.
      *
      * @param player The player to open the menu for.
      */
-    void open(@NotNull Player player);
+    void open(final Player player);
 
     /**
      * This method will allow you to refresh the menu.
      */
-    void refresh(@Nullable Player player);
+    void refresh();
 
     /**
      * This method will allow you to listen to the open event of the menu.
@@ -107,7 +105,7 @@ public interface AluminaMenu {
      * @param player The player who opened the menu.
      * @param event  The event.
      */
-    void onOpen(@NotNull Player player, @NotNull InventoryOpenEvent event);
+    void onOpen(final Player player, final InventoryOpenEvent event);
 
     /**
      * This method will allow you to listen to the close event of the menu.
@@ -115,7 +113,7 @@ public interface AluminaMenu {
      * @param player The player who closed the menu.
      * @param event  The event.
      */
-    void onClose(@NotNull Player player, @NotNull InventoryCloseEvent event);
+    void onClose(final Player player, final InventoryCloseEvent event);
 
     /**
      * This method will allow you to listen to the click event of the menu.
@@ -123,7 +121,7 @@ public interface AluminaMenu {
      * @param player The player who clicked the menu.
      * @param event  The event.
      */
-    void onClick(@NotNull Player player, @NotNull InventoryClickEvent event);
+    void onClick(final Player player, final InventoryClickEvent event);
 
     /**
      * This method will allow you to listen to the function click event of the menu.
@@ -134,7 +132,7 @@ public interface AluminaMenu {
      * @deprecated Use {@link #onFunctionClick(Player, String, InventoryClickEvent)} instead.
      */
     @Deprecated
-    void onFunctionClick(@NotNull Player player, @NotNull MenuItem item, @NotNull InventoryClickEvent event);
+    void onFunctionClick(final Player player, final MenuItem item, final InventoryClickEvent event);
 
     /**
      * This method will allow you to listen to the function click event of the menu.
@@ -142,5 +140,5 @@ public interface AluminaMenu {
      * @param key The function key.
      * @param event The event.
      */
-    void onFunctionClick(@NotNull Player player, @NotNull String key, @NotNull InventoryClickEvent event);
+    void onFunctionClick(final Player player, final String key, final InventoryClickEvent event);
 }
