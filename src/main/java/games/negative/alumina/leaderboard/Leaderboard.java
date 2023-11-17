@@ -46,21 +46,21 @@ public abstract class Leaderboard<K, V extends Comparable<V>> {
      * @param key Key to get the value of.
      * @return Value of the given key.
      */
-    public abstract V getValue(K key);
+    public abstract V getValue(final K key);
 
     /**
      * Parses the key to a string.
      * @param key Key to parse.
      * @return Parsed key.
      */
-    public abstract String parseKey(K key);
+    public abstract String parseKey(final K key);
 
     /**
      * Parses the value to a string.
      * @param value Value to parse.
      * @return Parsed value.
      */
-    public abstract String parseValue(V value);
+    public abstract String parseValue(final V value);
 
     /**
      * Gets the error message of the leaderboard.
