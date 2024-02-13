@@ -117,7 +117,7 @@ public class PlayerUtil {
      * @param <T>        The type of collection
      * @return The collection of items that could not be added to the player's inventory
      */
-    private <T extends Iterable<ItemStack>> Collection<ItemStack> fillInventory(@NotNull Player player, @NotNull T collection) {
+    public static  <T extends Iterable<ItemStack>> Collection<ItemStack> fillInventory(@NotNull Player player, @NotNull T collection) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
         Preconditions.checkNotNull(collection, "'collection' cannot be null!");
 
