@@ -54,6 +54,7 @@ import java.util.Map;
 public abstract class AluminaPlugin extends JavaPlugin {
 
     private static AluminaPlugin instance;
+    private Metrics metrics;
 
     /**
      * This method is called when the plugin is initially loaded.
@@ -230,14 +231,14 @@ public abstract class AluminaPlugin extends JavaPlugin {
     public void onLoad() {
         instance = this;
 
+        this.metrics = new Metrics(this, 20987);
+
         load();
     }
 
     @Override
     public void onEnable() {
         new MenuListener();
-
-        Metrics metrics = new Metrics(this, 20987);
 
         enable();
     }
@@ -249,5 +250,10 @@ public abstract class AluminaPlugin extends JavaPlugin {
 
     public static AluminaPlugin getAluminaInstance() {
         return instance;
+    }
+
+    @NotNull
+    public Metrics metrics() {
+        return metrics;
     }
 }
