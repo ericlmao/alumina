@@ -666,6 +666,7 @@ import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * MiniMessageUtil is a utility class for translating messages using the MiniMessage library.
@@ -683,6 +684,20 @@ public class MiniMessageUtil {
      */
     @NotNull
     public Component translate(@NotNull String message) {
+        return mm.deserialize(message);
+    }
+
+    /**
+     * Translates the given message into a Component using the MiniMessage library.
+     *
+     * @param message  the message to be translated
+     * @param instance the MiniMessage instance to be used for translation.
+     *                 If null, the default instance from MiniMessageUtil.mm will be used.
+     * @return the translated Component
+     */
+    @NotNull
+    public Component translate(@NotNull String message, @Nullable MiniMessage instance) {
+        MiniMessage mm = instance == null ? MiniMessageUtil.mm : instance;
         return mm.deserialize(message);
     }
 

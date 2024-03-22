@@ -33,6 +33,8 @@ import com.google.common.collect.Lists;
 import games.negative.alumina.util.MiniMessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -57,6 +59,9 @@ import java.util.stream.Collectors;
  * Represents a builder utility for {@link ItemStack} to make item creation easier for the developer.
  */
 public class ItemBuilder {
+
+    // This is required so item names will not have italics by default!
+    private static final MiniMessage mm = MiniMessage.builder().postProcessor(component -> component.decoration(TextDecoration.ITALIC, false)).build();
 
     private final ItemStack item;
     private final ItemMeta meta;
@@ -110,7 +115,7 @@ public class ItemBuilder {
     public ItemBuilder setName(@NotNull final String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
-        this.meta.displayName(MiniMessageUtil.translate(text));
+        this.meta.displayName(MiniMessageUtil.translate(text, mm));
         return this;
     }
 
@@ -142,7 +147,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> components = Arrays.stream(text).map(MiniMessageUtil::translate).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
         this.meta.lore(components);
         return this;
     }
@@ -156,7 +161,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
-        List<Component> components = text.stream().map(MiniMessageUtil::translate).collect(Collectors.toList());
+        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
         this.meta.lore(components);
         return this;
     }
@@ -172,7 +177,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        lore.add(MiniMessageUtil.translate(text));
+        lore.add(MiniMessageUtil.translate(text, mm));
         this.meta.lore(lore);
 
         return this;
@@ -190,7 +195,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = Arrays.stream(text).map(MiniMessageUtil::translate).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
         lore.addAll(components);
 
         this.meta.lore(lore);
@@ -210,7 +215,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = text.stream().map(MiniMessageUtil::translate).toList();
+        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
 
         this.meta.lore(lore);
