@@ -1,11 +1,8 @@
 // Plugins
 plugins {
     id 'java'
+    id 'maven-publish'
 }
-
-// Project Credentials
-def group = 'games.negative.alumina'
-def version = '2.3.2'
 
 // Project Repositories
 repositories {
@@ -80,4 +77,19 @@ tasks {
     }
 }
 
+// Maven Publish (Local Repository)
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'games.negative.alumina'
+            artifactId = 'alumina'
+            version = '2.3.2'
+            from components.java
+
+            artifact sourcesJar {
+                archiveClassifier.set("sources")
+            }
+        }
+    }
+}
 
