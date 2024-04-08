@@ -6,10 +6,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import games.negative.alumina.AluminaPlugin;
 import games.negative.alumina.menu.holder.PaginatedMenuHolder;
-import games.negative.alumina.util.ColorUtil;
 import games.negative.alumina.util.MathUtil;
 import games.negative.alumina.util.NBTEditor;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
@@ -42,7 +42,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
     private static final NamespacedKey FUNCTION = new NamespacedKey(AluminaPlugin.getAluminaInstance(), "paginated-menu-function");
 
     @Setter
-    private String title = "Paginated Menu";
+    private Component title = Component.text("Paginated Menu");
     private int rows = 1;
     protected int page = 1;
 
@@ -62,7 +62,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
      * Represents a paginated menu with a title and specified number of rows.
      * The menu uses a Bukkit inventory to display buttons and listings.
      */
-    public PaginatedMenu(@NotNull String title, int rows) {
+    public PaginatedMenu(@NotNull Component title, int rows) {
         Preconditions.checkNotNull(title, "Title cannot be null");
         Preconditions.checkArgument(MathUtil.between(rows, MIN_ROWS, MAX_ROWS), "Rows must be between " + MIN_ROWS + " and " + MAX_ROWS);
 
@@ -73,7 +73,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         this.listings = Sets.newLinkedHashSet();
         this.paginatedSlots = Sets.newHashSet();
 
-        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, ColorUtil.translate(title));
+        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
     }
 
     /**
@@ -160,7 +160,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
     public void open(@NotNull Player player) {
         Preconditions.checkNotNull(player, "Player cannot be null");
 
-        if (inventory == null) inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, ColorUtil.translate(title));
+        if (inventory == null) inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
 
         refresh(player);
 
@@ -322,19 +322,19 @@ public abstract class PaginatedMenu implements InteractiveMenu {
      * @param input The new title to set. Must not be null.
      * @throws NullPointerException if the input parameter is null.
      */
-    public void updateTitle(@NotNull String input) {
+    public void updateTitle(@NotNull Component input) {
         Preconditions.checkNotNull(input, "Title cannot be null");
 
         this.title = input;
 
         if (inventory == null)
-            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, ColorUtil.translate(title));
+            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
 
         for (HumanEntity viewer : inventory.getViewers()) {
             InventoryView view = viewer.getOpenInventory();
             if (!(view.getTopInventory().getHolder() instanceof PaginatedMenuHolder)) continue;
 
-            view.setTitle(ColorUtil.translate(title));
+            view.setTitle(ChestMenu.TITLE_SERIALIZER.serialize(title));
         }
     }
 
