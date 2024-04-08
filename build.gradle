@@ -1,6 +1,7 @@
 // Plugins
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 // Project Credentials
@@ -79,5 +80,4 @@ tasks {
         dependsOn(sourcesJar)
     }
 }
-
 
