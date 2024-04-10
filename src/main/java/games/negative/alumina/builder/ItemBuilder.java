@@ -37,6 +37,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -47,6 +48,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -401,6 +403,21 @@ public class ItemBuilder {
         Preconditions.checkNotNull(function, "Function cannot be null!");
 
         function.accept(this.meta.getPersistentDataContainer());
+        return this;
+    }
+
+    /**
+     * Add custom persistent data to the item.
+     * @param key The key to add the data to.
+     * @param type The type of the data.
+     * @param value The value of the data.
+     * @return The current instance of the builder.
+     * @param <T> The type of the data.
+     * @param <V> The value of the data.
+     */
+    @CheckReturnValue
+    public <T extends PersistentDataType<V, V>, V> ItemBuilder addNamespacedKey(@NotNull NamespacedKey key, T type, V value) {
+        this.meta.getPersistentDataContainer().set(key, type, value);
         return this;
     }
 
