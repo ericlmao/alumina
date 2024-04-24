@@ -36,6 +36,9 @@ dependencies {
     // PlaceholderAPI
     compileOnly("me.clip:placeholderapi:2.11.3")
 
+    // ConfigLib
+    compileOnly("de.exlll:configlib-yaml:4.5.0")
+
     annotationProcessor("org.projectlombok:lombok:1.18.32")
 }
 
