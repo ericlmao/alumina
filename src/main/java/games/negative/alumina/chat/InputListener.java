@@ -27,7 +27,6 @@ package games.negative.alumina.chat;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
 import games.negative.alumina.event.Events;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.entity.Player;
@@ -36,7 +35,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -48,7 +46,7 @@ import java.util.UUID;
  */
 public class InputListener {
 
-    private static final Cache<UUID, InputProcessor> listeners = CacheBuilder.newBuilder()
+    private static final Cache<UUID, InputProcessor> cache = CacheBuilder.newBuilder()
             .expireAfterWrite(Duration.of(10, ChronoUnit.MINUTES))
             .build();
 
@@ -57,21 +55,21 @@ public class InputListener {
         Events.listen(AsyncChatEvent.class, event -> {
             Player player = event.getPlayer();
             UUID uuid = player.getUniqueId();
-            if (!listeners.asMap().containsKey(uuid)) return;
+            if (!cache.asMap().containsKey(uuid)) return;
 
-            InputProcessor response = listeners.getIfPresent(uuid);
+            InputProcessor response = cache.getIfPresent(uuid);
             if (response == null) return;
 
             try {
                 event.setCancelled(true);
                 response.process(event);
             } catch (Exception ignored) {} finally {
-                listeners.invalidate(uuid);
+                cache.invalidate(uuid);
             }
         });
 
         // Remove the listener when the player quits the server
-        Events.listen(PlayerQuitEvent.class, event -> listeners.invalidate(event.getPlayer().getUniqueId()));
+        Events.listen(PlayerQuitEvent.class, event -> cache.invalidate(event.getPlayer().getUniqueId()));
     }
 
     /**
@@ -81,7 +79,7 @@ public class InputListener {
      * @param response The input listener response that will be executed when the player sends a chat message or command.
      */
     public static void listen(@NotNull UUID uuid, @NotNull InputListener.InputProcessor response) {
-        listeners.put(uuid, response);
+        cache.put(uuid, response);
     }
 
     /**
