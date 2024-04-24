@@ -663,11 +663,8 @@
 package games.negative.alumina.sound;
 
 import com.google.common.base.Preconditions;
-import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -676,41 +673,7 @@ import org.jetbrains.annotations.NotNull;
  * @param volume The volume
  * @param pitch The pitch
  */
-public record BukkitSound(@NotNull Sound sound, float volume, float pitch) {
-
-    /**
-     * Plays a sound for the specified player.
-     *
-     * @param player The player to play the sound for. Must not be null.
-     */
-    public void play(@NotNull Player player) {
-        player.playSound(player, sound, volume, pitch);
-    }
-
-    /**
-     * Plays a sound for each player in a given collection.
-     *
-     * @param collection The collection of players.
-     * @param <T> The type of collection.
-     */
-    public <T extends Iterable<? extends Player>> void play(@NotNull T collection) {
-        for (Player player : collection) {
-            play(player);
-        }
-    }
-
-    /**
-     * Plays a sound at the specified location.
-     *
-     * @param location The location where the sound will be played
-     * @throws NullPointerException if the 'location' parameter is null or if the world of the location is null
-     */
-    public void play(@NotNull Location location) {
-        World world = location.getWorld();
-        Preconditions.checkNotNull(world, "World cannot be null");
-
-        world.playSound(location, sound, volume, pitch);
-    }
+public record BukkitSound(@NotNull Sound sound, float volume, float pitch) implements MinecraftSound {
 
     /**
      * Converts a ConfigurationSection to a BukkitSound object.
