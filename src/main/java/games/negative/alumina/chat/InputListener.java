@@ -25,6 +25,8 @@
 
 package games.negative.alumina.chat;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import games.negative.alumina.event.Events;
 import io.papermc.paper.event.player.AsyncChatEvent;
@@ -32,6 +34,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,28 +48,30 @@ import java.util.UUID;
  */
 public class InputListener {
 
-    private static final Map<UUID, InputProcessor> listeners = Maps.newHashMap();
+    private static final Cache<UUID, InputProcessor> listeners = CacheBuilder.newBuilder()
+            .expireAfterWrite(Duration.of(10, ChronoUnit.MINUTES))
+            .build();
 
     static {
         // Listen to chat messages
         Events.listen(AsyncChatEvent.class, event -> {
             Player player = event.getPlayer();
             UUID uuid = player.getUniqueId();
-            if (!listeners.containsKey(uuid)) return;
+            if (!listeners.asMap().containsKey(uuid)) return;
 
-            InputProcessor response = listeners.get(uuid);
+            InputProcessor response = listeners.getIfPresent(uuid);
             if (response == null) return;
 
             try {
                 event.setCancelled(true);
                 response.process(event);
             } catch (Exception ignored) {} finally {
-                listeners.remove(uuid);
+                listeners.invalidate(uuid);
             }
         });
 
         // Remove the listener when the player quits the server
-        Events.listen(PlayerQuitEvent.class, event -> listeners.remove(event.getPlayer().getUniqueId()));
+        Events.listen(PlayerQuitEvent.class, event -> listeners.invalidate(event.getPlayer().getUniqueId()));
     }
 
     /**
