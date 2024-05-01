@@ -23,6 +23,8 @@
  *
  */
 
+
+
 package games.negative.alumina.model;
 
 import games.negative.alumina.message.Message;

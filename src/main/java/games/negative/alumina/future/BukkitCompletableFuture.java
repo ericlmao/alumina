@@ -23,6 +23,7 @@
  *
  */
 
+
 package games.negative.alumina.future;
 
 import games.negative.alumina.util.Tasks;

@@ -23,6 +23,7 @@
  *
  */
 
+
 package games.negative.alumina.model;
 
 import org.jetbrains.annotations.NotNull;

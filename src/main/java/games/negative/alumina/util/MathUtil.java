@@ -23,6 +23,7 @@
  *
  */
 
+
 package games.negative.alumina.util;
 
 /**
