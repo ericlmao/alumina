@@ -66,4 +66,11 @@ public record TabContext(CommandSender sender, String[] args) {
         return argument(args.length - 1).orElseThrow(() -> new IllegalStateException("No current argument"));
     }
 
+    /**
+     * Returns the index of the current argument.
+     * @return the index of the current argument.
+     */
+    public int index() {
+        return args.length - 1;
+    }
 }
