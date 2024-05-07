@@ -30,6 +30,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import games.negative.alumina.message.Message;
+import games.negative.alumina.util.MathUtil;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -281,6 +282,34 @@ public abstract class Command extends org.bukkit.command.Command {
 
             List<String> matched = match.stream().filter(entry -> entry.toLowerCase().contains(current)).toList();
             result.addAll(matched);
+        }
+
+        if (!result.isEmpty()) return result;
+
+        for (int i = args.length - 1; i >= 0; i--) {
+            if (i == placement) continue;
+
+            String arg = args[i];
+            if (arg.isEmpty()) continue;
+
+            Command cmd = subMap.get(i).stream()
+                    .filter(command -> command.getName().equalsIgnoreCase(arg) || command.getAliases().contains(arg.toLowerCase()) || (command.subAliases != null && command.subAliases.contains(arg.toLowerCase())))
+                    .findFirst().orElse(null);
+
+            if (cmd == null || hasInvalidPermissions(sender, false)) continue;
+
+            List<String> completion = cmd.onTabComplete(context);
+            if (completion != null && !completion.isEmpty()) {
+                result.addAll(completion);
+                continue;
+            }
+
+            int depth = (MathUtil.absDiff(i, placement) - 1);
+            try {
+                String param = cmd.getParams().get(depth);
+                result.add("[<" + param + ">]");
+            } catch (Exception ignored) {
+            }
         }
 
         return result;
