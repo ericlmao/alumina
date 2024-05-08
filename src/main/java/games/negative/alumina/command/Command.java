@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Getter
 @SuppressWarnings("unused")
@@ -108,6 +109,11 @@ public abstract class Command extends org.bukkit.command.Command {
     private final boolean smartTabComplete;
 
     /**
+     * The predicate to test the players against for tab completion.
+     */
+    private final Predicate<Player> tabCompleteViewRequirement;
+
+    /**
      * The parent command of this command.
      */
     private Command parent;
@@ -134,6 +140,7 @@ public abstract class Command extends org.bukkit.command.Command {
         this.playerOnly = properties.playerOnly();
         this.consoleOnly = properties.consoleOnly();
         this.smartTabComplete = properties.smartTabComplete();
+        this.tabCompleteViewRequirement = properties.tabCompleteViewRequirement();
 
         if (properties.aliases() != null)
             applyAliases(properties);
@@ -276,6 +283,8 @@ public abstract class Command extends org.bukkit.command.Command {
         for (Command command : commands) {
             if (hasInvalidPermissions(sender, false)) continue;
 
+            if (tabCompleteViewRequirement != null && !tabCompleteViewRequirement.test((Player) sender)) continue;
+
             List<String> match = Lists.newArrayList(command.getName());
             match.addAll(command.getAliases());
             if (command.parent != null && command.subAliases != null) match.addAll(command.subAliases);
@@ -296,7 +305,7 @@ public abstract class Command extends org.bukkit.command.Command {
                     .filter(command -> command.getName().equalsIgnoreCase(arg) || command.getAliases().contains(arg.toLowerCase()) || (command.subAliases != null && command.subAliases.contains(arg.toLowerCase())))
                     .findFirst().orElse(null);
 
-            if (cmd == null || hasInvalidPermissions(sender, false)) continue;
+            if (cmd == null || hasInvalidPermissions(sender, false) || (tabCompleteViewRequirement != null && !tabCompleteViewRequirement.test((Player) sender))) continue;
 
             List<String> completion = cmd.onTabComplete(context);
             if (completion != null && !completion.isEmpty()) {

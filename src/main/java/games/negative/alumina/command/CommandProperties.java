@@ -26,14 +26,27 @@
 package games.negative.alumina.command;
 
 import lombok.Builder;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
- * The CommandProperties class represents the properties of a command.
+ * The properties of a command.
+ * @param name The name of the command.
+ * @param description The description of the command.
+ * @param usage The usage of the command.
+ * @param aliases The aliases of the command.
+ * @param permissions The permissions required to execute the command.
+ * @param params The required parameters of the command.
+ * @param shortcuts The shortcuts of the command.
+ * @param playerOnly Whether the command can only be executed by players.
+ * @param consoleOnly Whether the command can only be executed by the console.
+ * @param smartTabComplete Whether the command should use smart tab completion.
+ * @param tabCompleteViewRequirement The predicate to test the players against for tab completion.
  */
 @Builder
 public record CommandProperties(
@@ -46,7 +59,8 @@ public record CommandProperties(
         @Nullable List<String> shortcuts,
         boolean playerOnly,
         boolean consoleOnly,
-        boolean smartTabComplete
+        boolean smartTabComplete,
+        @Nullable Predicate<Player> tabCompleteViewRequirement
         ) {
 
 }
