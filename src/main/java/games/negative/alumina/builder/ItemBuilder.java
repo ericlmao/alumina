@@ -51,6 +51,7 @@ import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -122,6 +123,19 @@ public class ItemBuilder {
     }
 
     /**
+     * Set the display name of the item.
+     * @param component The component to set the display name to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder setName(@NotNull final Component component) {
+        Preconditions.checkNotNull(component, "Component cannot be null!");
+
+        this.meta.displayName(component);
+        return this;
+    }
+
+    /**
      * Replace a placeholder in the display name with a replacement.
      * @param placeholder The placeholder to replace.
      * @param replacement The replacement for the placeholder.
@@ -129,6 +143,25 @@ public class ItemBuilder {
      */
     @CheckReturnValue
     public ItemBuilder replaceName(@NotNull final String placeholder, @NotNull final String replacement) {
+        Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
+        Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
+
+        Component component = this.meta.displayName();
+        if (component == null) return this;
+
+        Component modified = component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build());
+        this.meta.displayName(modified);
+        return this;
+    }
+
+    /**
+     * Replace a placeholder in the display name with a replacement.
+     * @param placeholder The placeholder to replace.
+     * @param replacement The replacement for the placeholder.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder replaceName(@NotNull final String placeholder, @NotNull final Component replacement) {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
@@ -157,6 +190,20 @@ public class ItemBuilder {
 
     /**
      * Set the lore of the item.
+     * @param components The components to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder setLore(@NotNull final Component... components) {
+        Preconditions.checkNotNull(components, "Components cannot be null!");
+        Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
+
+        this.meta.lore(Arrays.asList(components));
+        return this;
+    }
+
+    /**
+     * Set the lore of the item.
      * @param text The text to set the lore to.
      * @return The current instance of the builder.
      */
@@ -167,6 +214,20 @@ public class ItemBuilder {
 
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
         this.meta.lore(components);
+        return this;
+    }
+
+    /**
+     * Set the lore of the item.
+     * @param components The components to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder setLore(@NotNull final Collection<Component> components) {
+        Preconditions.checkNotNull(components, "Components cannot be null!");
+        Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
+
+        this.meta.lore(components.stream().toList());
         return this;
     }
 
@@ -183,6 +244,24 @@ public class ItemBuilder {
         if (lore == null) lore = Lists.newArrayList();
 
         lore.add(MiniMessageUtil.translate(text, mm));
+        this.meta.lore(lore);
+
+        return this;
+    }
+
+    /**
+     * Add a single line of lore to the item.
+     * @param component The component to add to the lore.
+     * @return  The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder addLoreLine(@NotNull final Component component) {
+        Preconditions.checkNotNull(component, "Component cannot be null!");
+
+        List<Component> lore = this.meta.lore();
+        if (lore == null) lore = Lists.newArrayList();
+
+        lore.add(component);
         this.meta.lore(lore);
 
         return this;
@@ -211,6 +290,25 @@ public class ItemBuilder {
 
     /**
      * Add multiple lines of lore to the item.
+     * @param components The components to add to the lore.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder addLoreLines(@NotNull Component... components) {
+        Preconditions.checkNotNull(components, "Components cannot be null!");
+        Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
+
+        List<Component> lore = this.meta.lore();
+        if (lore == null) lore = Lists.newArrayList();
+
+        lore.addAll(Arrays.asList(components));
+
+        this.meta.lore(lore);
+        return this;
+    }
+
+    /**
+     * Add multiple lines of lore to the item.
      * @param text The text to add to the lore.
      * @return The current instance of the builder.
      */
@@ -225,6 +323,19 @@ public class ItemBuilder {
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
 
+        this.meta.lore(lore);
+        return this;
+    }
+
+    @CheckReturnValue
+    public ItemBuilder addLoreLines(@NotNull final Collection<Component> components) {
+        Preconditions.checkNotNull(components, "Components cannot be null!");
+        Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
+
+        List<Component> lore = this.meta.lore();
+        if (lore == null) lore = Lists.newArrayList();
+
+        lore.addAll(components);
         this.meta.lore(lore);
         return this;
     }
@@ -257,6 +368,28 @@ public class ItemBuilder {
      */
     @CheckReturnValue
     public ItemBuilder replaceLore(@NotNull final String placeholder, @NotNull final String replacement) {
+        Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
+        Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
+
+        List<Component> lore = this.meta.lore();
+        if (lore == null) lore = Lists.newArrayList();
+
+        List<Component> modified = lore.stream()
+                .map(component -> component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build()))
+                .collect(Collectors.toList());
+
+        this.meta.lore(modified);
+        return this;
+    }
+
+    /**
+     * Replace a single line of lore.
+     * @param placeholder The placeholder to replace.
+     * @param replacement The replacement for the placeholder.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder replaceLore(@NotNull final String placeholder, @NotNull final Component replacement) {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
