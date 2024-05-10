@@ -30,23 +30,39 @@ import games.negative.alumina.AluminaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
  * Interface for more simply working with events and calling events.
  */
-public interface Events extends Listener, EventExecutor {
+public class Events<T extends Event> implements Listener, EventExecutor {
+
+    private final UUID uuid = UUID.randomUUID();
+    private final Class<T> type;
+    private final Consumer<T> listener;
+    private final EventPriority priority;
+    private final boolean ignoreCancelled;
+
+    public Events(@NotNull Class<T> type, @NotNull Consumer<T> listener, @Nullable EventPriority priority, boolean ignoreCancelled) {
+        this.type = type;
+        this.listener = listener;
+        this.priority = (priority == null ? EventPriority.NORMAL : priority);
+        this.ignoreCancelled = ignoreCancelled;
+    }
 
     /**
      * Invoke an event.
      * @param event Event to invoke
      * @param <T> Event type
      */
-    static <T extends Event> void call(@NotNull final T event) {
+    public static <T extends Event> void call(@NotNull final T event) {
         Preconditions.checkNotNull(event, "Event cannot be null");
 
         Bukkit.getPluginManager().callEvent(event);
@@ -59,7 +75,7 @@ public interface Events extends Listener, EventExecutor {
      * @return Events
      * @param <T> Event type
      */
-    static <T extends Event> Events listen(@NotNull final Class<T> type, @NotNull final Consumer<T> listener) {
+    public static <T extends Event> Events<T> listen(@NotNull final Class<T> type, @NotNull final Consumer<T> listener) {
         Preconditions.checkNotNull(type, "Event type cannot be null");
         Preconditions.checkNotNull(listener, "Event listener cannot be null");
 
@@ -74,12 +90,12 @@ public interface Events extends Listener, EventExecutor {
      * @return Events
      * @param <T> Event type
      */
-    static <T extends Event> Events listen(@NotNull final Class<T> type, @NotNull final EventPriority priority, @NotNull final Consumer<T> listener) {
+    public static <T extends Event> Events<T> listen(@NotNull final Class<T> type, @NotNull final EventPriority priority, @NotNull final Consumer<T> listener) {
         Preconditions.checkNotNull(type, "Event type cannot be null");
         Preconditions.checkNotNull(priority, "Event priority cannot be null");
         Preconditions.checkNotNull(listener, "Event listener cannot be null");
 
-        final Events events = ($, event) -> listener.accept(type.cast(event));
+        Events<T> events = new Events<>(type, listener, priority, false);
 
         Bukkit.getPluginManager().registerEvent(type, events, priority, events, AluminaPlugin.getAluminaInstance());
 
@@ -95,15 +111,61 @@ public interface Events extends Listener, EventExecutor {
      * @return Events
      * @param <T> Event type
      */
-    static <T extends Event> Events listen(@NotNull final Class<T> type, @NotNull final EventPriority priority, final boolean ignoreCancelled, @NotNull final Consumer<T> listener) {
+    public static <T extends Event> Events<T> listen(@NotNull final Class<T> type, @NotNull final EventPriority priority, final boolean ignoreCancelled, @NotNull final Consumer<T> listener) {
         Preconditions.checkNotNull(type, "Event type cannot be null");
         Preconditions.checkNotNull(priority, "Event priority cannot be null");
         Preconditions.checkNotNull(listener, "Event listener cannot be null");
 
-        final Events events = ($, event) -> listener.accept(type.cast(event));
+        Events<T> events = new Events<>(type, listener, priority, ignoreCancelled);
 
         Bukkit.getPluginManager().registerEvent(type, events, priority, events, AluminaPlugin.getAluminaInstance(), ignoreCancelled);
 
         return events;
+    }
+
+    /**
+     * Listen to an event.
+     * @param listener Event listener
+     */
+    public static void listen(@NotNull Listener listener) {
+        Bukkit.getPluginManager().registerEvents(listener, AluminaPlugin.getAluminaInstance());
+    }
+
+    /**
+     * Listen to multiple events.
+     * @param listeners Event listeners
+     */
+    public static void listen(@NotNull Listener... listeners) {
+        for (Listener listener : listeners) {
+            listen(listener);
+        }
+    }
+
+    /**
+     * Listen to an event.
+     * @param bridge Event bridge
+     * @param <T> Event type
+     */
+    public static <T extends Event> void listen(@NotNull Events<T> bridge) {
+        Bukkit.getPluginManager().registerEvent(bridge.type, bridge, bridge.priority, bridge, AluminaPlugin.getAluminaInstance(), bridge.ignoreCancelled);
+    }
+
+    /**
+     * Check if the event is registered.
+     * @return true if the event is registered, false otherwise
+     */
+    public boolean isRegistered() {
+        return HandlerList.getRegisteredListeners(AluminaPlugin.getAluminaInstance()).stream()
+                .filter(registeredListener -> registeredListener.getListener() instanceof Events)
+                .map(registeredListener -> (Events<?>) registeredListener.getListener())
+                .anyMatch(events -> events.uuid.equals(this.uuid));
+
+    }
+
+    @Override
+    public void execute(@NotNull Listener listener, @NotNull Event event) {
+        if (!type.isInstance(event)) return;
+
+        this.listener.accept(type.cast(event));
     }
 }

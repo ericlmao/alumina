@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 import games.negative.alumina.dependency.DependencyLoader;
 import games.negative.alumina.dependency.MavenDependency;
 import games.negative.alumina.dependency.MavenRepository;
+import games.negative.alumina.event.Events;
 import games.negative.alumina.menu.listener.MenuListener;
 import games.negative.alumina.util.FileLoader;
 import org.bukkit.Bukkit;
@@ -136,16 +137,26 @@ public abstract class AluminaPlugin extends JavaPlugin {
         map.remove(name);
         existing.getAliases().forEach(map::remove);
     }
-    
+
+    /**
+     * This method is used to register multiple listeners.
+     * @param listeners The listeners to register.
+     */
     public void registerListeners(@NotNull Listener... listeners) {
         Preconditions.checkNotNull(listeners, "Listeners cannot be null!");
         Preconditions.checkArgument(listeners.length > 0, "Listeners cannot be empty!");
 
-        PluginManager manager = Bukkit.getPluginManager();
+        Events.listen(listeners);
+    }
 
-        for (Listener listener : listeners) {
-            manager.registerEvents(listener, this);
-        }
+    /**
+     * This method is used to register a listener.
+     * @param listener The listener to register.
+     */
+    public void registerListener(@NotNull Listener listener) {
+        Preconditions.checkNotNull(listener, "Listener cannot be null!");
+
+        Events.listen(listener);
     }
 
     /**
