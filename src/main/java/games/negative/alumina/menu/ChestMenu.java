@@ -27,16 +27,14 @@ package games.negative.alumina.menu;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
-import games.negative.alumina.AluminaPlugin;
+import de.tr7zw.changeme.nbtapi.NBT;
 import games.negative.alumina.menu.holder.ChestMenuHolder;
 import games.negative.alumina.util.MathUtil;
 import games.negative.alumina.util.MiniMessageUtil;
-import games.negative.alumina.util.NBTEditor;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -46,8 +44,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -61,8 +57,6 @@ public abstract class ChestMenu implements InteractiveMenu {
 
     private static final int MIN_ROWS = 1;
     private static final int MAX_ROWS = 6;
-
-    private static final NamespacedKey FUNCTION = new NamespacedKey(AluminaPlugin.getAluminaInstance(), "chest-menu-function");
 
     @Setter
     private Component title = Component.text("Chest Menu");
@@ -86,7 +80,7 @@ public abstract class ChestMenu implements InteractiveMenu {
         this.rows = rows;
 
         this.buttons = Sets.newHashSet();
-        this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, this.title);
+        this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
     }
 
     /**
@@ -100,7 +94,7 @@ public abstract class ChestMenu implements InteractiveMenu {
         this.rows = rows;
 
         this.buttons = Sets.newHashSet();
-        this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, this.title);
+        this.inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
     }
 
     /**
@@ -119,7 +113,7 @@ public abstract class ChestMenu implements InteractiveMenu {
     public void open(@NotNull Player player) {
         Preconditions.checkNotNull(player, "Player cannot be null");
 
-        if (inventory == null) inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, title);
+        if (inventory == null) inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
         refresh(player);
 
@@ -140,12 +134,9 @@ public abstract class ChestMenu implements InteractiveMenu {
             if (isSlotOccupied(slot) || !button.canView(player)) continue;
 
             ItemStack item = button.getItem();
-            ItemMeta meta = item.getItemMeta();
-            if (meta == null) continue;
-
-            NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, button.uuid().toString());
-
-            item.setItemMeta(meta);
+            NBT.modify(item, nbt -> {
+                nbt.setString("chest-menu-function", button.uuid().toString());
+            });
 
             if (slot == -1) slot = getFreeSlot();
             if (slot == -1) continue;
@@ -166,12 +157,9 @@ public abstract class ChestMenu implements InteractiveMenu {
         if (button == null) return;
 
         ItemStack item = button.getItem();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-
-        NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, button.uuid().toString());
-
-        item.setItemMeta(meta);
+        NBT.modify(item, nbt -> {
+            nbt.setString("chest-menu-function", button.uuid().toString());
+        });
 
         inventory.setItem(slot, item);
     }
@@ -217,10 +205,12 @@ public abstract class ChestMenu implements InteractiveMenu {
         ItemStack current = event.getCurrentItem();
         if (current == null) return;
 
-        ItemMeta meta = current.getItemMeta();
-        if (meta == null) return;
+        String function = NBT.get(current, nbt -> {
+            if (!nbt.hasTag("chest-menu-function")) return null;
 
-        String function = NBTEditor.get(meta, FUNCTION, PersistentDataType.STRING);
+            return nbt.getString("chest-menu-function");
+        });
+
         if (function == null) {
             // Check by slot.
             MenuButton button = buttons.stream().filter(menuButton -> menuButton.getSlot() == event.getSlot()).findFirst().orElse(null);
@@ -313,13 +303,16 @@ public abstract class ChestMenu implements InteractiveMenu {
         this.title = MiniMessageUtil.translate(input);
 
         if (inventory == null)
-            inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, title);
+            inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
-        for (HumanEntity viewer : inventory.getViewers()) {
-            InventoryView view = viewer.getOpenInventory();
-            if (!(view.getTopInventory().getHolder() instanceof ChestMenuHolder)) continue;
+        try {
+            for (HumanEntity viewer : inventory.getViewers()) {
+                InventoryView view = viewer.getOpenInventory();
+                if (!(view.getTopInventory().getHolder() instanceof ChestMenuHolder)) continue;
 
-            view.setTitle(TITLE_SERIALIZER.serialize(title));
+                view.setTitle(TITLE_SERIALIZER.serialize(title));
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -335,13 +328,17 @@ public abstract class ChestMenu implements InteractiveMenu {
         this.title = input;
 
         if (inventory == null)
-            inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, title);
+            inventory = Bukkit.createInventory(new ChestMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
-        for (HumanEntity viewer : inventory.getViewers()) {
-            InventoryView view = viewer.getOpenInventory();
-            if (!(view.getTopInventory().getHolder() instanceof ChestMenuHolder)) continue;
+        try {
+            for (HumanEntity viewer : inventory.getViewers()) {
+                InventoryView view = viewer.getOpenInventory();
+                if (!(view.getTopInventory().getHolder() instanceof ChestMenuHolder)) continue;
 
-            view.setTitle(TITLE_SERIALIZER.serialize(title));
+                view.setTitle(TITLE_SERIALIZER.serialize(title));
+            }
+        } catch (Exception ignored) {
+
         }
     }
 }

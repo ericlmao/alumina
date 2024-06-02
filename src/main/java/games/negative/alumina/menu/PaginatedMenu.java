@@ -29,15 +29,13 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import games.negative.alumina.AluminaPlugin;
+import de.tr7zw.changeme.nbtapi.NBT;
 import games.negative.alumina.menu.holder.PaginatedMenuHolder;
 import games.negative.alumina.util.MathUtil;
 import games.negative.alumina.util.MiniMessageUtil;
-import games.negative.alumina.util.NBTEditor;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -47,8 +45,6 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -65,7 +61,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
     private static final int MIN_ROWS = 1;
     private static final int MAX_ROWS = 6;
 
-    private static final NamespacedKey FUNCTION = new NamespacedKey(AluminaPlugin.getAluminaInstance(), "paginated-menu-function");
+//    private static final NamespacedKey FUNCTION = new NamespacedKey(AluminaPlugin.getAluminaInstance(), "paginated-menu-function");
 
     @Setter
     private Component title = Component.text("Paginated Menu");
@@ -170,15 +166,17 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         ItemStack current = event.getCurrentItem();
         if (current == null) return;
 
-        ItemMeta meta = current.getItemMeta();
-        if (meta == null) return;
-
         List<MenuButton> all = Lists.newArrayList(buttons);
         all.addAll(listings);
         all.add(nextPageButton);
         all.add(previousPageButton);
 
-        String function = NBTEditor.get(meta, FUNCTION, PersistentDataType.STRING);
+        String function = NBT.get(current, nbt -> {
+            if (!nbt.hasTag("paginated-menu-function")) return null;
+
+            return nbt.getString("paginated-menu-function");
+        });
+
         if (function == null) {
             // Check by slot.
             MenuButton button = all.stream().filter(menuButton -> menuButton.getSlot() == event.getSlot()).findFirst().orElse(null);
@@ -227,12 +225,9 @@ public abstract class PaginatedMenu implements InteractiveMenu {
             if (isSlotOccupied(slot) || !button.canView(player)) continue;
 
             ItemStack item = button.getItem();
-            ItemMeta meta = item.getItemMeta();
-            if (meta == null) continue;
-
-            NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, button.uuid().toString());
-
-            item.setItemMeta(meta);
+            NBT.modify(item, nbt -> {
+                nbt.setString("paginated-menu-function", button.uuid().toString());
+            });
 
             if (slot == -1) slot = getFreeSlot();
             if (slot == -1) continue;
@@ -255,12 +250,9 @@ public abstract class PaginatedMenu implements InteractiveMenu {
             listingSlots.remove(Integer.valueOf(available));
 
             ItemStack itemStack = item.getItem();
-            ItemMeta meta = itemStack.getItemMeta();
-            if (meta == null) continue;
-
-            NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, item.uuid().toString());
-
-            itemStack.setItemMeta(meta);
+            NBT.modify(itemStack, nbt -> {
+                nbt.setString("paginated-menu-function", item.uuid().toString());
+            });
 
             inventory.setItem(available, itemStack);
         }
@@ -269,12 +261,9 @@ public abstract class PaginatedMenu implements InteractiveMenu {
             Preconditions.checkNotNull(previousPageButton, "Previous page button cannot be null");
 
             ItemStack item = previousPageButton.getItem();
-            ItemMeta meta = item.getItemMeta();
-            if (meta == null) return;
-
-            NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, previousPageButton.uuid().toString());
-
-            item.setItemMeta(meta);
+            NBT.modify(item, nbt -> {
+                nbt.setString("paginated-menu-function", previousPageButton.uuid().toString());
+            });
 
             inventory.setItem(previousPageButton.getSlot(), item);
         }
@@ -283,12 +272,9 @@ public abstract class PaginatedMenu implements InteractiveMenu {
             Preconditions.checkNotNull(nextPageButton, "Next page button cannot be null");
 
             ItemStack item = nextPageButton.getItem();
-            ItemMeta meta = item.getItemMeta();
-            if (meta == null) return;
-
-            NBTEditor.set(meta, FUNCTION, PersistentDataType.STRING, nextPageButton.uuid().toString());
-
-            item.setItemMeta(meta);
+            NBT.modify(item, nbt -> {
+                nbt.setString("paginated-menu-function", nextPageButton.uuid().toString());
+            });
 
             inventory.setItem(nextPageButton.getSlot(), item);
         }

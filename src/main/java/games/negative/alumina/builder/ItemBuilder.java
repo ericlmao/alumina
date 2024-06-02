@@ -33,6 +33,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -53,6 +54,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -64,6 +66,8 @@ public class ItemBuilder {
 
     // This is required so item names will not have italics by default!
     private static final MiniMessage mm = MiniMessage.builder().postProcessor(component -> component.decoration(TextDecoration.ITALIC, false)).build();
+
+    public static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
     private final ItemStack item;
     private final ItemMeta meta;
@@ -118,7 +122,7 @@ public class ItemBuilder {
     public ItemBuilder setName(@NotNull final String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
-        this.meta.displayName(MiniMessageUtil.translate(text, mm));
+        this.meta.setDisplayName(LEGACY.serialize(MiniMessageUtil.translate(text, mm)));
         return this;
     }
 
@@ -131,7 +135,7 @@ public class ItemBuilder {
     public ItemBuilder setName(@NotNull final Component component) {
         Preconditions.checkNotNull(component, "Component cannot be null!");
 
-        this.meta.displayName(component);
+        this.meta.setDisplayName(LEGACY.serialize(component));
         return this;
     }
 
@@ -146,11 +150,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
-        Component component = this.meta.displayName();
-        if (component == null) return this;
+        Component component = LEGACY.deserialize(this.meta.getDisplayName());
 
         Component modified = component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build());
-        this.meta.displayName(modified);
+        this.meta.setDisplayName(LEGACY.serialize(modified));
         return this;
     }
 
@@ -165,11 +168,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
-        Component component = this.meta.displayName();
-        if (component == null) return this;
+        Component component = LEGACY.deserialize(this.meta.getDisplayName());
 
         Component modified = component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build());
-        this.meta.displayName(modified);
+        this.meta.setDisplayName(LEGACY.serialize(modified));
         return this;
     }
 
@@ -183,8 +185,9 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
-        this.meta.lore(components);
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).toList();
+        List<String> mapped = components.stream().map(LEGACY::serialize).toList();
+        this.meta.setLore(mapped);
         return this;
     }
 
@@ -198,7 +201,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
 
-        this.meta.lore(Arrays.asList(components));
+        this.meta.setLore(Arrays.stream(components).map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -213,7 +216,8 @@ public class ItemBuilder {
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
-        this.meta.lore(components);
+        List<String> mapped = components.stream().map(LEGACY::serialize).toList();
+        this.meta.setLore(mapped);
         return this;
     }
 
@@ -227,7 +231,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
 
-        this.meta.lore(components.stream().toList());
+        this.meta.setLore(components.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -240,11 +244,10 @@ public class ItemBuilder {
     public ItemBuilder addLoreLine(@NotNull final String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         lore.add(MiniMessageUtil.translate(text, mm));
-        this.meta.lore(lore);
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
 
         return this;
     }
@@ -258,11 +261,11 @@ public class ItemBuilder {
     public ItemBuilder addLoreLine(@NotNull final Component component) {
         Preconditions.checkNotNull(component, "Component cannot be null!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         lore.add(component);
-        this.meta.lore(lore);
+
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
 
         return this;
     }
@@ -277,13 +280,12 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
 
-        this.meta.lore(lore);
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
 
         return this;
     }
@@ -298,12 +300,11 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         lore.addAll(Arrays.asList(components));
 
-        this.meta.lore(lore);
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -317,13 +318,12 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
 
-        this.meta.lore(lore);
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -332,11 +332,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         lore.addAll(components);
-        this.meta.lore(lore);
+        this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -371,14 +370,13 @@ public class ItemBuilder {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         List<Component> modified = lore.stream()
                 .map(component -> component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build()))
-                .collect(Collectors.toList());
+                .toList();
 
-        this.meta.lore(modified);
+        this.meta.setLore(modified.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
@@ -393,14 +391,13 @@ public class ItemBuilder {
         Preconditions.checkNotNull(placeholder, "Placeholder cannot be null!");
         Preconditions.checkNotNull(replacement, "Replacement cannot be null!");
 
-        List<Component> lore = this.meta.lore();
-        if (lore == null) lore = Lists.newArrayList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
 
         List<Component> modified = lore.stream()
                 .map(component -> component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build()))
                 .collect(Collectors.toList());
 
-        this.meta.lore(modified);
+        this.meta.setLore(modified.stream().map(LEGACY::serialize).toList());
         return this;
     }
 
