@@ -244,7 +244,10 @@ public class ItemBuilder {
     public ItemBuilder addLoreLine(@NotNull final String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         lore.add(MiniMessageUtil.translate(text, mm));
         this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
@@ -261,7 +264,10 @@ public class ItemBuilder {
     public ItemBuilder addLoreLine(@NotNull final Component component) {
         Preconditions.checkNotNull(component, "Component cannot be null!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         lore.add(component);
 
@@ -280,7 +286,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
@@ -300,7 +309,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         lore.addAll(Arrays.asList(components));
 
@@ -318,7 +330,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).toList();
         lore.addAll(components);
@@ -332,7 +347,10 @@ public class ItemBuilder {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
 
-        List<Component> lore = Objects.requireNonNull(this.meta.getLore()).stream().map(s -> (Component) LEGACY.deserialize(s)).toList();
+        List<Component> lore = Objects.requireNonNull(this.meta.getLore())
+                .stream()
+                .map(s -> (Component) LEGACY.deserialize(s))
+                .collect(Collectors.toCollection(Lists::newArrayList));
 
         lore.addAll(components);
         this.meta.setLore(lore.stream().map(LEGACY::serialize).toList());
@@ -395,7 +413,7 @@ public class ItemBuilder {
 
         List<Component> modified = lore.stream()
                 .map(component -> component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build()))
-                .collect(Collectors.toList());
+                .toList();
 
         this.meta.setLore(modified.stream().map(LEGACY::serialize).toList());
         return this;

@@ -35,6 +35,7 @@ import games.negative.alumina.util.MathUtil;
 import games.negative.alumina.util.MiniMessageUtil;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -57,6 +58,8 @@ import java.util.Set;
  * @apiNote This system still uses the old Spigot method of formatting titles, such as &c for red.
  */
 public abstract class PaginatedMenu implements InteractiveMenu {
+
+    public static final LegacyComponentSerializer TITLE_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private static final int MIN_ROWS = 1;
     private static final int MAX_ROWS = 6;
@@ -95,7 +98,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         this.listings = Sets.newLinkedHashSet();
         this.paginatedSlots = Sets.newHashSet();
 
-        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, this.title);
+        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
     }
 
     /**
@@ -113,7 +116,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         this.listings = Sets.newLinkedHashSet();
         this.paginatedSlots = Sets.newHashSet();
 
-        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, this.title);
+        this.inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
     }
 
     /**
@@ -202,7 +205,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
     public void open(@NotNull Player player) {
         Preconditions.checkNotNull(player, "Player cannot be null");
 
-        if (inventory == null) inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
+        if (inventory == null) inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
         refresh(player);
 
@@ -358,7 +361,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         this.title = MiniMessageUtil.translate(input);
 
         if (inventory == null)
-            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
+            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
         for (HumanEntity viewer : inventory.getViewers()) {
             InventoryView view = viewer.getOpenInventory();
@@ -380,13 +383,16 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         this.title = input;
 
         if (inventory == null)
-            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, title);
+            inventory = Bukkit.createInventory(new PaginatedMenuHolder(this), rows * 9, TITLE_SERIALIZER.serialize(this.title));
 
-        for (HumanEntity viewer : inventory.getViewers()) {
-            InventoryView view = viewer.getOpenInventory();
-            if (!(view.getTopInventory().getHolder() instanceof PaginatedMenuHolder)) continue;
+        try {
+            for (HumanEntity viewer : inventory.getViewers()) {
+                InventoryView view = viewer.getOpenInventory();
+                if (!(view.getTopInventory().getHolder() instanceof PaginatedMenuHolder)) continue;
 
-            view.setTitle(ChestMenu.TITLE_SERIALIZER.serialize(title));
+                view.setTitle(TITLE_SERIALIZER.serialize(title));
+            }
+        } catch (Exception ignored) {
         }
     }
 

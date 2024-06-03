@@ -29,9 +29,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import games.negative.alumina.message.Message;
+import games.negative.alumina.message.LegacyMessage;
 import games.negative.alumina.util.MathUtil;
 import lombok.Getter;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -48,25 +49,27 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public abstract class Command extends org.bukkit.command.Command {
 
+    private static BukkitAudiences audiences;
+
     /**
      * The message for when the player does not have permission to use the command.
      */
-    private static final Message NO_PERMISSION = Message.of("<red>You do not have permission to use this command.");
+    private static final LegacyMessage NO_PERMISSION = LegacyMessage.of("<red>You do not have permission to use this command.");
 
     /**
      * The message for when a player-only command is used as a console.
      */
-    private static final Message CANNOT_USE_AS_CONSOLE = Message.of("<red>You cannot use this command as console.");
+    private static final LegacyMessage CANNOT_USE_AS_CONSOLE = LegacyMessage.of("<red>You cannot use this command as console.");
 
     /**
      * The message for when a console-only command is used as a player.
      */
-    private static final Message CANNOT_USE_AS_PLAYER = Message.of("<red>You cannot use this command as a player.");
+    private static final LegacyMessage CANNOT_USE_AS_PLAYER = LegacyMessage.of("<red>You cannot use this command as a player.");
 
     /**
      * The message for when a command is used incorrectly.
      */
-    private static final Message USAGE = Message.of("<click:suggest_command:'/%command% %usage%'><red>Usage: <gray>/%command% %usage%</click>");
+    private static final LegacyMessage USAGE = LegacyMessage.of("<click:suggest_command:'/%command% %usage%'><red>Usage: <gray>/%command% %usage%</click>");
 
     /**
      * The sub commands of this command.
@@ -391,6 +394,7 @@ public abstract class Command extends org.bukkit.command.Command {
         }
 
         if (message) NO_PERMISSION.send(sender);
+
         return true;
     }
 
@@ -496,5 +500,9 @@ public abstract class Command extends org.bukkit.command.Command {
         }
 
         this.subAliases = properties.aliases();
+    }
+
+    public static void setAudienceProvider(@NotNull BukkitAudiences audiences) {
+        Command.audiences = audiences;
     }
 }

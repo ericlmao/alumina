@@ -31,6 +31,7 @@ import games.negative.alumina.dependency.DependencyLoader;
 import games.negative.alumina.dependency.MavenDependency;
 import games.negative.alumina.dependency.MavenRepository;
 import games.negative.alumina.event.Events;
+import games.negative.alumina.logger.Logs;
 import games.negative.alumina.menu.listener.MenuListener;
 import games.negative.alumina.util.FileLoader;
 import org.bukkit.Bukkit;
@@ -134,11 +135,21 @@ public abstract class AluminaPlugin extends JavaPlugin {
         Preconditions.checkNotNull(existing, "Existing command cannot be null!");
         Preconditions.checkNotNull(commandMap, "Command map cannot be null!");
 
-        Map<String, Command> map;
+        Map<String, Command> map = null;
         try {
             map = (Map<String, Command>) commandMap.getClass().getDeclaredMethod("getKnownCommands").invoke(commandMap);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            getLogger().severe("Could not retrieve the command map. (Illegal Access, Invocation Target, No Such Method)");
+            try {
+                Field commandField = commandMap.getClass().getDeclaredField("knownCommands");
+                commandField.setAccessible(true);
+                map = (Map<String, Command>) commandField.get(commandMap);
+
+            } catch (NoSuchFieldException | IllegalAccessException ex) {
+            }
+        }
+
+        if (map == null) {
+            Logs.severe("Could not find the known commands map.");
             return;
         }
 
