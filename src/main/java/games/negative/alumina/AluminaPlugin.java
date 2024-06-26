@@ -35,6 +35,7 @@ import games.negative.alumina.logger.Logs;
 import games.negative.alumina.menu.config.YamlItemStack;
 import games.negative.alumina.menu.listener.MenuListener;
 import games.negative.alumina.util.FileLoader;
+import games.negative.alumina.version.VersionData;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -42,7 +43,9 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -55,6 +58,8 @@ import java.util.Map;
 public abstract class AluminaPlugin extends JavaPlugin {
 
     private static AluminaPlugin instance;
+
+    private VersionData version;
 
     /**
      * This method is called when the plugin is initially loaded.
@@ -264,5 +269,21 @@ public abstract class AluminaPlugin extends JavaPlugin {
 
     public static AluminaPlugin getAluminaInstance() {
         return instance;
+    }
+
+    @Nullable
+    @CheckReturnValue
+    public VersionData getVersion() {
+        return version;
+    }
+
+    public void setVersion(@Nullable VersionData version) {
+        this.version = version;
+    }
+
+    @Nullable
+    @CheckReturnValue
+    public static VersionData version() {
+        return instance.getVersion();
     }
 }
