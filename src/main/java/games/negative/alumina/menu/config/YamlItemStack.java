@@ -32,10 +32,14 @@ import com.google.common.collect.Lists;
 import de.exlll.configlib.Configuration;
 import games.negative.alumina.builder.ItemBuilder;
 import games.negative.alumina.model.Pair;
+import games.negative.alumina.util.MiniMessageUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -80,21 +84,16 @@ public class YamlItemStack {
         ItemBuilder builder = new ItemBuilder(material, (amount == null ? 1 : amount));
 
         if (displayName != null) {
-            builder.setName(displayName);
+            String name = displayName;
 
             if (placeholders != null && placeholders.length > 1) {
-                List<Pair<String, String>> mapped = Lists.newArrayList();
-
                 Preconditions.checkArgument(placeholders.length % 2 == 0, "Placeholders must be in pairs");
                 for (int i = 0; i < placeholders.length; i += 2) {
-                    mapped.add(new Pair<>(placeholders[i], placeholders[i + 1]));
-                }
-
-                for (Pair<String, String> pair : mapped) {
-                    builder.replaceName(pair.left(), pair.right());
+                    name = name.replace(placeholders[i], placeholders[i + 1]);
                 }
             }
 
+            builder.setName(name);
         }
 
         if (lore != null && !lore.isEmpty()) {
