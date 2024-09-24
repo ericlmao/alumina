@@ -3,10 +3,6 @@ before_install:
   - sdk install java 21.0.4-open
   - sdk use java 21.0.4-open
 
-
-jdk:
-  - openjdk21   # Specifies the JDK version (can be openjdk11 or other versions)
-
 gradle:
   wrapper: true  # Indicates if the project uses Gradle wrapper
 
