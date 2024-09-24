@@ -58,7 +58,6 @@ import java.util.Set;
 
 /**
  * A paginated menu that can be used to display a large number of items in a Chest Menu environment.
- * @apiNote This system still uses the old Spigot method of formatting titles, such as &c for red.
  */
 public abstract class PaginatedMenu implements InteractiveMenu {
 
