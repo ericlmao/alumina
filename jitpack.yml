@@ -1,16 +1,16 @@
 # jitpack.yml for a Gradle project
 
 jdk:
-  - openjdk17   # Specifies the JDK version (can be openjdk11 or other versions)
+  - openjdk21   # Specifies the JDK version (can be openjdk11 or other versions)
 
 gradle:
   wrapper: true  # Indicates if the project uses Gradle wrapper
 
 install:
-  - ./gradlew clean build  # Commands for building your project
+  - ./gradle clean build  # Commands for building your project
 
 build:
-  - ./gradlew assemble  # Commands for assembling the library artifacts
+  - ./gradle assemble  # Commands for assembling the library artifacts
 
 # Optionally, if you have custom dependencies or special needs for submodules
 # submodules: true
