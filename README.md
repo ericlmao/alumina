@@ -11,16 +11,15 @@
 ![maven](assets/Maven.png)
 ```xml
 <repository>
-    <id>Negative Games</id>
-    <url>https://repo.negative.games/repository/maven-releases/</url>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
 </repository>
 ```
 ```xml
 <dependency>
-    <groupId>games.negative.alumina</groupId>
+    <groupId>com.github.ericlmao</groupId>
     <artifactId>alumina</artifactId>
-    <version>2.8.2</version>
-    <scope>compile</scope>
+    <version>2.9.3</version>
 </dependency>
 ```
 
@@ -53,10 +52,10 @@ In case other software in your JVM is using this library, you should shade it in
 ***
 ![gradle](assets/Gradle.png)
 ```groovy
-maven { url 'https://repo.negative.games/repository/maven-releases/' }
+maven { url 'https://jitpack.io' }
 ```
 ```groovy
-implementation("games.negative.alumina:alumina:2.8.2")
+implementation("com.github.ericlmao:alumina:2.9.3")
 ```
 ***
 ![discord](assets/Discord.png)
