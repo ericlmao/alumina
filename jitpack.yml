@@ -1,7 +1,7 @@
 # jitpack.yml for a Gradle project
 before_install:
-  - sdk install java 21.0.4-open
-  - sdk use java 21.0.4-open
+  - sdk install java 21.0.4-tem
+  - sdk use java 21.0.4-tem
 
 gradle:
   wrapper: true  # Indicates if the project uses Gradle wrapper
