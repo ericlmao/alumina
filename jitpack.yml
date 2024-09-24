@@ -1,6 +1,11 @@
 # jitpack.yml for a Gradle project
 jdk:
-  - openjdk17
+  - openjdk21
+before_install:
+  - sdk install java 21.0.4-open
+  - sdk use java 21.0.4-open
+  #- sdk install maven
+  #- mvn -v
 #gradle:
 #  wrapper: true  # Indicates if the project uses Gradle wrapper
 
