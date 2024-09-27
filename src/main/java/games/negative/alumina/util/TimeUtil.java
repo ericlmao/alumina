@@ -289,7 +289,12 @@ public class TimeUtil {
                 builder.append(entry);
             }
 
-            return builder.toString();
+            String string = builder.toString();
+
+            char last = string.charAt(string.length() - 1);
+            if (last == ' ') string = string.substring(0, string.length() - 1);
+
+            return string;
         }
     }
 }
