@@ -26,6 +26,9 @@
 package games.negative.alumina.message;
 
 import com.google.common.collect.Maps;
+import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
+import games.negative.alumina.message.translation.LegacyMiniMessageTranslator;
+import games.negative.alumina.util.PluginUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -136,6 +139,11 @@ public class Message {
                 current = current.replaceAll(entry.getKey(), entry.getValue());
             }
 
+            // Parse legacy color codes if available.
+            if (current.contains("&")) {
+                current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
+            }
+
             // Parse PlaceholderAPI if available.
             if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 Player player = (viewer instanceof Player) ? (Player) viewer : null;
@@ -147,6 +155,11 @@ public class Message {
             // Replacements for components
             for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
                 component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
+            }
+
+            // Parse ItemsAdder unicodes if available.
+            if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
+                component = FontImageWrapper.replaceFontImages(player, component);
             }
 
             return component;

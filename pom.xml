@@ -90,6 +90,22 @@
             <id>Maven2</id>
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
+
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+
+        <repository>
+            <id>maven_central</id>
+            <name>Maven Central</name>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+
+        <repository>
+            <id>matteodev</id>
+            <url>https://www.matteodev.it/spigot/public/maven/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -131,6 +147,23 @@
             <artifactId>lombok</artifactId>
             <version>1.18.34</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- LoneLibs -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>LoneLibs</artifactId>
+            <version>1.0.58</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ItemsAdder API -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>api-itemsadder</artifactId>
+            <version>4.0.2-beta-release-11</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/ItemsAdder-API.jar</systemPath>
         </dependency>
     </dependencies>
 
