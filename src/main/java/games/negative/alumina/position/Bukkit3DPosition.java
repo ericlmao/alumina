@@ -38,6 +38,7 @@ import java.util.Map;
 /**
  * The Bukkit3DPosition class represents a 3D position in a Bukkit world.
  */
+@Deprecated
 public record Bukkit3DPosition(@NotNull World world, double x, double y, double z, float yaw, float pitch) implements Locatable, ConfigurationSerializable {
 
     @Override

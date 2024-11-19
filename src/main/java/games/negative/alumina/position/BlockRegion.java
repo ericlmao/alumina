@@ -50,6 +50,7 @@ import java.util.function.Predicate;
  * @param min The minimum block position.
  * @param max The maximum block position.
  */
+@Deprecated
 public record BlockRegion(String name, World world, BlockPosition min, BlockPosition max) implements ConfigurationSerializable {
 
     public BlockRegion {
