@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
  * @param volume The volume
  * @param pitch The pitch
  */
+@Deprecated
 public record BukkitSound(@NotNull Sound sound, float volume, float pitch) implements MinecraftSound {
 
     /**
