@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 /**
  * The DependencyLoader class is responsible for dynamically loading dependencies into a Java plugin.
  */
+@Deprecated
 public class DependencyLoader {
 
     public static final MavenRepository CENTRAL = new MavenRepository("https://repo1.maven.org/maven2");

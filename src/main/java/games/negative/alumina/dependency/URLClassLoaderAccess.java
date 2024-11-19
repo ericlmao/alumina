@@ -36,6 +36,7 @@ import java.util.Collection;
 /**
  * Provides access to {@link URLClassLoader}#addURL.
  */
+@Deprecated
 public abstract class URLClassLoaderAccess {
 
     /**

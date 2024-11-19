@@ -28,5 +28,6 @@ package games.negative.alumina.dependency;
 /**
  * The MavenRepository class represents a Maven repository URL.
  */
+@Deprecated
 public record MavenRepository(String url) {
 }
