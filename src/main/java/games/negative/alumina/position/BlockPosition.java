@@ -36,6 +36,7 @@ import java.util.Map;
  * @param y Y coordinate
  * @param z Z coordinate
  */
+@Deprecated
 public record BlockPosition(int x, int y, int z) implements ConfigurationSerializable {
 
     @NotNull

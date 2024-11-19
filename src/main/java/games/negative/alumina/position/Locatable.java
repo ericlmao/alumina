@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The Locatable interface provides methods to get and set the location of an object.
  */
+@Deprecated
 public interface Locatable {
 
     /**
