@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +64,7 @@ import java.util.stream.Collectors;
 public class ItemBuilder {
 
     // This is required so item names will not have italics by default!
-    private static final MiniMessage mm = MiniMessage.builder().postProcessor(component -> component.decoration(TextDecoration.ITALIC, false)).build();
+    public static final MiniMessage MINIMESSAGE = MiniMessage.builder().postProcessor(component -> component.decoration(TextDecoration.ITALIC, false)).build();
 
     private final ItemStack item;
     private final ItemMeta meta;
@@ -120,7 +119,7 @@ public class ItemBuilder {
     public ItemBuilder setName(@NotNull final String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
-        this.meta.displayName(MiniMessageUtil.translate(text, mm));
+        this.meta.displayName(MiniMessageUtil.translate(text, MINIMESSAGE));
         return this;
     }
 
@@ -185,7 +184,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
         this.meta.lore(components);
         return this;
     }
@@ -214,7 +213,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
-        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
+        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
         this.meta.lore(components);
         return this;
     }
@@ -245,7 +244,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        lore.add(MiniMessageUtil.translate(text, mm));
+        lore.add(MiniMessageUtil.translate(text, MINIMESSAGE));
         this.meta.lore(lore);
 
         return this;
@@ -282,7 +281,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, mm)).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
         lore.addAll(components);
 
         this.meta.lore(lore);
@@ -322,7 +321,7 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, mm)).toList();
+        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).toList();
         lore.addAll(components);
 
         this.meta.lore(lore);
@@ -339,26 +338,6 @@ public class ItemBuilder {
 
         lore.addAll(components);
         this.meta.lore(lore);
-        return this;
-    }
-
-    /**
-     * Replace the lore of the item.
-     * @param function The function to replace the lore.
-     * @return The current instance of the builder.
-     * @deprecated Please ise {@link #replaceLore(String, String)} instead.
-     */
-    @Deprecated(since = "2.0.0", forRemoval = true)
-    @CheckReturnValue
-    public ItemBuilder replaceLore(@NotNull final UnaryOperator<String> function) {
-        Preconditions.checkNotNull(function, "Function cannot be null!");
-
-        List<String> lore = this.meta.getLore();
-        if (lore == null) lore = Lists.newArrayList();
-
-        lore.replaceAll(function);
-
-        this.meta.setLore(lore);
         return this;
     }
 
@@ -414,7 +393,7 @@ public class ItemBuilder {
      */
     @CheckReturnValue
     public ItemBuilder replaceLore(@NotNull String placeholder, @NotNull List<String> replacement) {
-        return replaceLore(placeholder, replacement.stream().map(s -> MiniMessageUtil.translate(s, mm)).map(component -> (TextComponent) component).toList());
+        return replaceLore(placeholder, replacement.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).map(component -> (TextComponent) component).toList());
     }
 
     /**
