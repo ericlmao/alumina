@@ -38,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
  * You must add a static instance of {@link HandlerList} and override {@link #getHandlers()}.
  * Might be deprecated in the future!
  */
+@Deprecated
 public abstract class PluginEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
