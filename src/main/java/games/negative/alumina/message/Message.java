@@ -50,8 +50,20 @@ public class Message {
 
     private final String content;
 
+    /**
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
+     */
     public Message(@NotNull String content) {
         this.content = content;
+    }
+
+    /**
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
+     */
+    public Message(@NotNull String... content) {
+        this(String.join("<newline>", content));
     }
 
     @NotNull
@@ -132,6 +144,21 @@ public class Message {
             recipient.sendMessage(component);
         }
 
+        /**
+         * Get a {@link Component} representation of the message.
+         * @return The component representation of the message.
+         */
+        @NotNull
+        public Component asComponent() {
+            return asComponent(null);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @param viewer The viewer of the message.
+         * @return The component representation of the message.
+         * @param <V> The type of the viewer.
+         */
         @NotNull
         public <V extends Audience> Component asComponent(@Nullable V viewer) {
             // Replacements for pre-serialized strings
