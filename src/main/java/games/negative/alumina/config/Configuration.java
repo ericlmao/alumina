@@ -1,5 +1,6 @@
 package games.negative.alumina.config;
 
+import com.google.common.base.Preconditions;
 import de.exlll.configlib.YamlConfigurationProperties;
 import de.exlll.configlib.YamlConfigurationStore;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +64,9 @@ public class Configuration<T> {
      */
     @NotNull
     public T get() {
+        // throw exception if object is actually null
+        Preconditions.checkNotNull(object, "Configuration object for \"%s\" has not been set yet.".formatted(file.getName()));
+
         return object;
     }
 
