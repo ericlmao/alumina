@@ -31,6 +31,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated
 public interface MinecraftSound {
 
     /**
