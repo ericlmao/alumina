@@ -31,6 +31,7 @@ import java.net.URL;
 /**
  * The MavenDependency class represents a Maven dependency with group, artifact, version, and repository URL.
  */
+@Deprecated
 public record MavenDependency(String group, String artifact, String version, MavenRepository repository) {
 
     /**
