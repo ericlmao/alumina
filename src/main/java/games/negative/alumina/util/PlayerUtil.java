@@ -78,7 +78,6 @@ public class PlayerUtil {
         player.setWalkSpeed(0.2F);
         player.setAllowFlight(false);
         player.setFlying(false);
-        player.getOpenInventory().close();
         player.getInventory().clear();
         player.getInventory().setArmorContents(null);
         player.setHealth(20);
