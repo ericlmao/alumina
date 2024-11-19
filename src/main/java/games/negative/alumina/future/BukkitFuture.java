@@ -38,6 +38,7 @@ import java.util.function.Supplier;
  * Exactly the same as {@link CompletableFuture} but using Bukkit Threads.
  * @param <T> The type of the result.
  */
+@Deprecated
 public interface BukkitFuture<T> {
 
     /**

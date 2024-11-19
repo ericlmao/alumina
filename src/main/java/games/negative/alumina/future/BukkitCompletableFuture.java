@@ -42,6 +42,7 @@ import java.util.function.Supplier;
  * Exactly the same as {@link java.util.concurrent.CompletableFuture} but using Bukkit Threads.
  * @param <T> The type of the result.
  */
+@Deprecated
 public class BukkitCompletableFuture<T> implements BukkitFuture<T> {
 
     private static final Duration LIFETIME = Duration.ofMinutes(30);
