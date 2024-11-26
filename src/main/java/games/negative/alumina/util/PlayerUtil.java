@@ -39,6 +39,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -364,12 +365,14 @@ public class PlayerUtil {
      * @param world The name of the world.
      * @return {@code true} if the player is in the world, {@code false} otherwise.
      * @throws NullPointerException if {@code player} or {@code world} is null.
+     * @deprecated Use {@link LocationUtil#isInWorld(Location, String)}
      */
+    @Deprecated
     public boolean isInWorld(@NotNull Player player, @NotNull String world) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
         Preconditions.checkNotNull(world, "'world' cannot be null!");
 
-        return player.getWorld().getName().equalsIgnoreCase(world);
+        return LocationUtil.isInWorld(player.getLocation(), world);
     }
 
     /**
@@ -379,16 +382,13 @@ public class PlayerUtil {
      * @param worlds The names of the worlds.
      * @return {@code true} if the player is in any of the worlds, {@code false} otherwise.
      * @throws NullPointerException if {@code player} or {@code worlds} is null.
+     * @deprecated Use {@link LocationUtil#isInWorld(Location, String...)}
      */
+    @Deprecated
     public boolean isInWorld(@NotNull Player player, @NotNull String... worlds) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
         Preconditions.checkNotNull(worlds, "'worlds' cannot be null!");
 
-        String current = player.getWorld().getName();
-        for (String world : worlds) {
-            if (current.equalsIgnoreCase(world)) return true;
-        }
-
-        return false;
+        return LocationUtil.isInWorld(player.getLocation(), worlds);
     }
 }
