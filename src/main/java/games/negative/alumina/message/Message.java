@@ -26,7 +26,6 @@
 package games.negative.alumina.message;
 
 import com.google.common.collect.Maps;
-import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import games.negative.alumina.message.translation.LegacyMiniMessageTranslator;
 import games.negative.alumina.util.PluginUtil;
 import net.kyori.adventure.audience.Audience;
@@ -35,10 +34,12 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -186,9 +187,21 @@ public class Message {
 
             // Parse ItemsAdder unicodes if available.
             if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
-                component = FontImageWrapper.replaceFontImages(player, component);
+                component = parseItemsAdder(player, component);
             }
 
+            return component;
+        }
+    }
+
+    private Component parseItemsAdder(@NotNull Player player, @NotNull Component component) {
+        try {
+            Class.forName("dev.lone.itemsadder.api.FontImages");
+
+            Class<?> clazz = Class.forName("dev.lone.itemsadder.api.FontImages.FontImageWrapper");
+            Object method = clazz.getDeclaredMethod("replaceFontImages", Permissible.class, Component.class).invoke(null, player, component);
+            return (Component) method;
+        } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             return component;
         }
     }

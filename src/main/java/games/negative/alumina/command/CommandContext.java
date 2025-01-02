@@ -25,9 +25,9 @@
 
 package games.negative.alumina.command;
 
-import lonelibs.org.jetbrains.annotations.NotNull;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
