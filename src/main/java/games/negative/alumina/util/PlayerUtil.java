@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,6 @@ package games.negative.alumina.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
-import games.negative.alumina.future.BukkitCompletableFuture;
-import games.negative.alumina.future.BukkitFuture;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.title.Title;
@@ -40,7 +38,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -184,38 +181,6 @@ public class PlayerUtil {
                 .replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
 
         return UUID.fromString(uuidStr);
-    }
-
-    /**
-     * Retrieves an OfflinePlayer object for the given username.
-     *
-     * @param username The username of the player.
-     * @return A BukkitFuture object that completes with the OfflinePlayer.
-     * @throws NullPointerException if 'username' is null.
-     */
-    public BukkitFuture<OfflinePlayer> getOfflinePlayer(@NotNull String username) {
-        Preconditions.checkNotNull(username, "'username' cannot be null!");;
-
-        BukkitFuture<OfflinePlayer> future = new BukkitCompletableFuture<>();
-        BukkitFuture<UUID> uuidFuture = new BukkitCompletableFuture<>();
-        uuidFuture.supplyAsync(() -> {
-            try {
-                return getByName(username);
-            } catch (IOException e) {
-                return null;
-            }
-        });
-
-        uuidFuture.whenCompleteAsync(uuid -> {
-            if (uuid == null) {
-                future.cancel();
-                return;
-            }
-
-            future.supply(() -> Bukkit.getOfflinePlayer(uuid));
-        });
-
-        return future;
     }
 
     /**

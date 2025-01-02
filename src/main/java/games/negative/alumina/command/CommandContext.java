@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,53 +23,46 @@
  *
  */
 
-package games.negative.alumina.sound;
+package games.negative.alumina.command;
 
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import lonelibs.org.jetbrains.annotations.NotNull;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
-@Deprecated
-public interface MinecraftSound {
+import java.util.Optional;
+
+/**
+ * This class is used to represent the context of a command when executed.
+ * @param args The arguments of the command
+ * @param sender The sender of the command
+ */
+public record CommandContext(@NotNull String[] args, @NotNull CommandSender sender) {
 
     /**
-     * The sound to play.
-     * @return The sound to play.
+     * Returns the player who executed the command.
+     * @return the player who executed the command.
      */
     @NotNull
-    Sound sound();
-
-    /**
-     * The volume of the sound.
-     * @return The volume of the sound.
-     */
-    float volume();
-
-    /**
-     * The pitch of the sound.
-     * @return The pitch of the sound.
-     */
-    float pitch();
-
-    /**
-     * Plays the sound to the player.
-     * @param player The player to play the sound to.
-     */
-    default void play(@NotNull Player player) {
-        player.playSound(player, sound(), volume(), pitch());
+    public Optional<Player> player() {
+        return sender() instanceof Player ? Optional.of((Player) sender()) : Optional.empty();
     }
 
     /**
-     * Plays the sound at the location.
-     * @param location The location to play the sound at.
+     * Returns the argument at the specified index.
+     * @param index The index of the argument.
+     * @return the argument at the specified index.
      */
-    default void play(@NotNull Location location) {
-        World world = location.getWorld();
-        if (world == null) return;
+    @NotNull
+    public Optional<String> argument(final int index) {
+        return (index >= args.length ? Optional.empty() : Optional.of(args[index]));
+    }
 
-        world.playSound(location, sound(), volume(), pitch());
+    /**
+     * Returns the length of the arguments.
+     * @return the length of the arguments.
+     */
+    public int length() {
+        return args.length;
     }
 
 }
