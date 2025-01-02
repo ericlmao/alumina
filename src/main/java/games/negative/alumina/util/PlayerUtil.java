@@ -103,7 +103,7 @@ public class PlayerUtil {
     private void resetHealth(@NotNull Player player) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
 
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (attribute == null) return;
 
         Collection<AttributeModifier> modifiers = attribute.getModifiers();
