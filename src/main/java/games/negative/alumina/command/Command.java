@@ -75,7 +75,6 @@ public abstract class Command extends org.bukkit.command.Command {
 
 
     private final List<Command> subCommands;
-    //private final List<Permission> permissions;
     private final List<String> params;
     private final Map<String, Function<CommandSender, List<String>>> parameters;
     private final List<String> shortcuts;
