@@ -29,6 +29,9 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import games.negative.alumina.util.MiniMessageUtil;
+import io.papermc.paper.datacomponent.DataComponentBuilder;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Unbreakable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -67,7 +70,7 @@ public class ItemBuilder {
     public static final MiniMessage MINIMESSAGE = MiniMessage.builder().postProcessor(component -> component.decoration(TextDecoration.ITALIC, false)).build();
 
     private final ItemStack item;
-    private final ItemMeta meta;
+    private ItemMeta meta;
 
     /**
      * Creates a new {@link ItemBuilder} instance from an existing {@link ItemStack}.
@@ -98,7 +101,7 @@ public class ItemBuilder {
      * @param material The material to create the builder from.
      */
     public ItemBuilder(@NotNull final Material material) {
-        this(new ItemStack(material));
+        this(ItemStack.of(material));
     }
 
     /**
@@ -107,7 +110,7 @@ public class ItemBuilder {
      * @param amount The amount of the item.
      */
     public ItemBuilder(@NotNull final Material material, final int amount) {
-        this(new ItemStack(material, amount));
+        this(ItemStack.of(material, amount));
     }
 
     /**
@@ -120,6 +123,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
         this.meta.displayName(MiniMessageUtil.translate(text, MINIMESSAGE));
+        applyMeta();
         return this;
     }
 
@@ -133,6 +137,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(component, "Component cannot be null!");
 
         this.meta.displayName(component);
+        applyMeta();
         return this;
     }
 
@@ -152,6 +157,7 @@ public class ItemBuilder {
 
         Component modified = component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build());
         this.meta.displayName(modified);
+        applyMeta();
         return this;
     }
 
@@ -171,6 +177,7 @@ public class ItemBuilder {
 
         Component modified = component.replaceText(TextReplacementConfig.builder().matchLiteral(placeholder).replacement(replacement).build());
         this.meta.displayName(modified);
+        applyMeta();
         return this;
     }
 
@@ -186,6 +193,7 @@ public class ItemBuilder {
 
         List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
         this.meta.lore(components);
+        applyMeta();
         return this;
     }
 
@@ -200,6 +208,7 @@ public class ItemBuilder {
         Preconditions.checkArgument(components.length > 0, "Components cannot be empty!");
 
         this.meta.lore(Arrays.asList(components));
+        applyMeta();
         return this;
     }
 
@@ -215,6 +224,7 @@ public class ItemBuilder {
 
         List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
         this.meta.lore(components);
+        applyMeta();
         return this;
     }
 
@@ -229,6 +239,7 @@ public class ItemBuilder {
         Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
 
         this.meta.lore(components.stream().toList());
+        applyMeta();
         return this;
     }
 
@@ -247,6 +258,7 @@ public class ItemBuilder {
         lore.add(MiniMessageUtil.translate(text, MINIMESSAGE));
         this.meta.lore(lore);
 
+        applyMeta();
         return this;
     }
 
@@ -265,6 +277,7 @@ public class ItemBuilder {
         lore.add(component);
         this.meta.lore(lore);
 
+        applyMeta();
         return this;
     }
 
@@ -286,6 +299,7 @@ public class ItemBuilder {
 
         this.meta.lore(lore);
 
+        applyMeta();
         return this;
     }
 
@@ -305,6 +319,7 @@ public class ItemBuilder {
         lore.addAll(Arrays.asList(components));
 
         this.meta.lore(lore);
+        applyMeta();
         return this;
     }
 
@@ -325,6 +340,7 @@ public class ItemBuilder {
         lore.addAll(components);
 
         this.meta.lore(lore);
+        applyMeta();
         return this;
     }
 
@@ -338,6 +354,7 @@ public class ItemBuilder {
 
         lore.addAll(components);
         this.meta.lore(lore);
+        applyMeta();
         return this;
     }
 
@@ -360,6 +377,7 @@ public class ItemBuilder {
                 .collect(Collectors.toList());
 
         this.meta.lore(modified);
+        applyMeta();
         return this;
     }
 
@@ -382,6 +400,7 @@ public class ItemBuilder {
                 .collect(Collectors.toList());
 
         this.meta.lore(modified);
+        applyMeta();
         return this;
     }
 
@@ -424,6 +443,7 @@ public class ItemBuilder {
         }
 
         this.meta.lore(components);
+        applyMeta();
         return this;
     }
 
@@ -439,6 +459,7 @@ public class ItemBuilder {
         Preconditions.checkArgument(level > 0, "Level must be greater than 0!");
 
         this.meta.addEnchant(enchantment, level, true);
+        applyMeta();
         return this;
     }
 
@@ -452,17 +473,18 @@ public class ItemBuilder {
         Preconditions.checkNotNull(enchantment, "Enchantment cannot be null!");
 
         this.meta.removeEnchant(enchantment);
+        applyMeta();
         return this;
     }
 
     /**
      * Set the item to be unbreakable.
-     * @param unbreakable Whether the item should be unbreakable.
+     * @param showInToolTip Whether to show the unbreakable status in the tooltip.
      * @return The current instance of the builder.
      */
     @CheckReturnValue
-    public ItemBuilder setUnbreakable(final boolean unbreakable) {
-        this.meta.setUnbreakable(unbreakable);
+    public ItemBuilder setUnbreakable(boolean showInToolTip) {
+        this.item.setData(DataComponentTypes.UNBREAKABLE, (DataComponentBuilder<Unbreakable>) () -> Unbreakable.unbreakable().showInTooltip(showInToolTip).build());
         return this;
     }
 
@@ -477,6 +499,7 @@ public class ItemBuilder {
         Preconditions.checkArgument(flags.length > 0, "Flags cannot be empty!");
 
         this.meta.addItemFlags(flags);
+        applyMeta();
         return this;
     }
 
@@ -491,6 +514,7 @@ public class ItemBuilder {
         Preconditions.checkArgument(flags.length > 0, "Flags cannot be empty!");
 
         this.meta.removeItemFlags(flags);
+        applyMeta();
         return this;
     }
 
@@ -506,6 +530,8 @@ public class ItemBuilder {
 
         SkullMeta skullMeta = (SkullMeta) this.meta;
         skullMeta.setOwningPlayer(player);
+        this.item.setItemMeta(skullMeta);
+        applyMeta();
         return this;
     }
 
@@ -520,6 +546,9 @@ public class ItemBuilder {
         Preconditions.checkNotNull(profile, "Profile cannot be null!");
         SkullMeta skullMeta = (SkullMeta) this.meta;
         skullMeta.setPlayerProfile(profile);
+
+        this.item.setItemMeta(skullMeta);
+        applyMeta();
         return this;
     }
 
@@ -531,6 +560,7 @@ public class ItemBuilder {
     @CheckReturnValue
     public ItemBuilder setCustomModelData(@NotNull final Integer data) {
         this.meta.setCustomModelData(data);
+        applyMeta();
         return this;
     }
 
@@ -544,6 +574,9 @@ public class ItemBuilder {
     public ItemBuilder setLeatherColor(@NotNull final Color color) {
         LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) this.meta;
         leatherArmorMeta.setColor(color);
+
+        this.item.setItemMeta(leatherArmorMeta);
+        applyMeta();
         return this;
     }
 
@@ -557,6 +590,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(function, "Function cannot be null!");
 
         function.accept(this.meta.getPersistentDataContainer());
+        applyMeta();
         return this;
     }
 
@@ -572,6 +606,7 @@ public class ItemBuilder {
     @CheckReturnValue
     public <T extends PersistentDataType<V, V>, V> ItemBuilder addNamespacedKey(@NotNull NamespacedKey key, @NotNull T type, @NotNull V value) {
         this.meta.getPersistentDataContainer().set(key, type, value);
+        applyMeta();
         return this;
     }
 
@@ -587,6 +622,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(modifier, "Modifier cannot be null!");
 
         this.meta.addAttributeModifier(attribute, modifier);
+        applyMeta();
         return this;
     }
 
@@ -600,6 +636,7 @@ public class ItemBuilder {
         Preconditions.checkNotNull(attribute, "Attribute cannot be null!");
 
         this.meta.removeAttributeModifier(attribute);
+        applyMeta();
         return this;
     }
 
@@ -615,7 +652,24 @@ public class ItemBuilder {
         Preconditions.checkNotNull(modifier, "Modifier cannot be null!");
 
         this.meta.removeAttributeModifier(attribute, modifier);
+        applyMeta();
         return this;
+    }
+
+    /**
+     * Set the item to be glowing.
+     * @param value Whether the item should be glowing.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder glowing(boolean value) {
+        item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, value);
+        return this;
+    }
+    
+    private void applyMeta() {
+        this.item.setItemMeta(this.meta);
+        this.meta = item.getItemMeta();
     }
 
     /**
@@ -624,7 +678,7 @@ public class ItemBuilder {
      */
     @NotNull
     public ItemStack build() {
-        this.item.setItemMeta(this.meta);
+        applyMeta();
         return this.item;
     }
 
