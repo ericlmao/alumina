@@ -37,8 +37,6 @@ import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
@@ -56,8 +54,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class YamlItemStack {
-
-    private static Enchantment GLOWING;
 
     private String displayName = null;
     private Material material = null;
@@ -85,14 +81,6 @@ public class YamlItemStack {
     @CheckReturnValue
     public static Builder builder() {
         return new Builder();
-    }
-
-    /**
-     * Sets the glowing enchantment.
-     * @param enchantment The enchantment.
-     */
-    public static void setGlowingEnchantment(@NotNull Enchantment enchantment) {
-        GLOWING = enchantment;
     }
 
     /**
@@ -323,12 +311,6 @@ public class YamlItemStack {
                 }).collect(Collectors.toCollection(Lists::newArrayList));
 
                 builder.setLore(components);
-            }
-
-            Boolean glowing = stack.glowing;
-            if (glowing != null && glowing) {
-                builder.addEnchantment(GLOWING, 10);
-                builder.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
 
             Integer customModelData = stack.customModelData;

@@ -27,9 +27,6 @@ package games.negative.alumina;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import games.negative.alumina.dependency.DependencyLoader;
-import games.negative.alumina.dependency.MavenDependency;
-import games.negative.alumina.dependency.MavenRepository;
 import games.negative.alumina.event.Events;
 import games.negative.alumina.logger.Logs;
 import games.negative.alumina.menu.config.YamlItemStack;
@@ -206,46 +203,10 @@ public abstract class AluminaPlugin extends JavaPlugin {
         FileLoader.loadFile(this, name);
     }
 
-    /**
-     * Loads a dependency into a JavaPlugin using the provided group id, artifact id, version.
-     *
-     * @param groupId    the group id of the dependency
-     * @param artifactId the artifact id of the dependency
-     * @param version    the version of the dependency
-     */
-    public void loadDependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version) {
-        loadDependency(groupId, artifactId, version, DependencyLoader.CENTRAL.url());
-    }
-
-    /**
-     * Loads a dependency into a JavaPlugin using the provided group id, artifact id, version, and repository URL.
-     *
-     * @param groupId    The group id of the dependency.
-     * @param artifactId The artifact id of the dependency.
-     * @param version    The version of the dependency.
-     * @param repoUrl    The repository URL where the dependency is located.
-     * @throws NullPointerException if `plugin`, `groupId`, `artifactId`, `version`, or `repoUrl` is null.
-     * @throws RuntimeException if unable to load the dependency.
-     */
-    public void loadDependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version, @NotNull String repoUrl) {
-        Preconditions.checkNotNull(groupId, "'groupId' cannot be null!");
-        Preconditions.checkNotNull(artifactId, "'artifactId' cannot be null!");
-        Preconditions.checkNotNull(version, "'version' cannot be null!");
-        Preconditions.checkNotNull(repoUrl, "'repoUrl' cannot be null!");
-
-        DependencyLoader.loadDependency(this, new MavenDependency(groupId, artifactId, version, new MavenRepository(repoUrl)));
-    }
-
 
     @Override
     public void onLoad() {
         instance = this;
-
-        try {
-            YamlItemStack.setGlowingEnchantment(Enchantment.CHANNELING);
-        } catch (Exception ignored) {
-            Logs.severe("Could not initialize glowing enchantment. (Exception)");
-        }
 
         load();
     }
