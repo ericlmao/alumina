@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,19 +27,12 @@ package games.negative.alumina;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import games.negative.alumina.dependency.DependencyLoader;
-import games.negative.alumina.dependency.MavenDependency;
-import games.negative.alumina.dependency.MavenRepository;
 import games.negative.alumina.event.Events;
-import games.negative.alumina.logger.Logs;
-import games.negative.alumina.menu.config.YamlItemStack;
 import games.negative.alumina.menu.listener.MenuListener;
-import games.negative.alumina.util.FileLoader;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -198,54 +191,9 @@ public abstract class AluminaPlugin extends JavaPlugin {
         Events.listen(listener);
     }
 
-    /**
-     * This method is used to load a file from the plugin's resources folder.
-     * @param name The name of the file to load.
-     */
-    public void loadFile(@NotNull String name) {
-        FileLoader.loadFile(this, name);
-    }
-
-    /**
-     * Loads a dependency into a JavaPlugin using the provided group id, artifact id, version.
-     *
-     * @param groupId    the group id of the dependency
-     * @param artifactId the artifact id of the dependency
-     * @param version    the version of the dependency
-     */
-    public void loadDependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version) {
-        loadDependency(groupId, artifactId, version, DependencyLoader.CENTRAL.url());
-    }
-
-    /**
-     * Loads a dependency into a JavaPlugin using the provided group id, artifact id, version, and repository URL.
-     *
-     * @param groupId    The group id of the dependency.
-     * @param artifactId The artifact id of the dependency.
-     * @param version    The version of the dependency.
-     * @param repoUrl    The repository URL where the dependency is located.
-     * @throws NullPointerException if `plugin`, `groupId`, `artifactId`, `version`, or `repoUrl` is null.
-     * @throws RuntimeException if unable to load the dependency.
-     */
-    public void loadDependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version, @NotNull String repoUrl) {
-        Preconditions.checkNotNull(groupId, "'groupId' cannot be null!");
-        Preconditions.checkNotNull(artifactId, "'artifactId' cannot be null!");
-        Preconditions.checkNotNull(version, "'version' cannot be null!");
-        Preconditions.checkNotNull(repoUrl, "'repoUrl' cannot be null!");
-
-        DependencyLoader.loadDependency(this, new MavenDependency(groupId, artifactId, version, new MavenRepository(repoUrl)));
-    }
-
-
     @Override
     public void onLoad() {
         instance = this;
-
-        try {
-            YamlItemStack.setGlowingEnchantment(Enchantment.CHANNELING);
-        } catch (Exception ignored) {
-            Logs.severe("Could not initialize glowing enchantment. (Exception)");
-        }
 
         load();
     }

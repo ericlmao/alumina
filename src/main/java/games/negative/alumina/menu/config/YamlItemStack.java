@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,32 +25,26 @@
 
 package games.negative.alumina.menu.config;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import de.exlll.configlib.Configuration;
 import games.negative.alumina.builder.ItemBuilder;
-import games.negative.alumina.model.Pair;
-import games.negative.alumina.util.MiniMessageUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Represents a configurable item stack.
@@ -61,132 +55,272 @@ import java.util.UUID;
 @AllArgsConstructor
 public class YamlItemStack {
 
-    private static Enchantment GLOWING;
-
     private String displayName = null;
     private Material material = null;
     private Integer amount = null;
     private Integer slot = null;
     private Boolean glowing = null;
     private List<String> lore = null;
-    private String headTextureValue = null;
-    private String headTextureSignature = null;
     private Integer customModelData = null;
 
     /**
-     * Converts this YamlItemStack to an {@link ItemStack}.
+     * Creates a {@link ItemStack} in accordance with the properties of this YamlItemStack.
      * @return The ItemStack.
      */
     @NotNull
-    public ItemStack asItemStack(@Nullable String... placeholders) {
-        Preconditions.checkNotNull(material, "Material must not be null");
-
-        ItemBuilder builder = new ItemBuilder(material, (amount == null ? 1 : amount));
-
-        if (displayName != null) {
-            String name = displayName;
-
-            if (placeholders != null && placeholders.length > 1) {
-                Preconditions.checkArgument(placeholders.length % 2 == 0, "Placeholders must be in pairs");
-                for (int i = 0; i < placeholders.length; i += 2) {
-                    name = name.replace(placeholders[i], placeholders[i + 1]);
-                }
-            }
-
-            builder.setName(name);
-        }
-
-        if (lore != null && !lore.isEmpty()) {
-            builder.setLore(lore);
-
-            if (placeholders != null && placeholders.length > 1) {
-                List<Pair<String, String>> mapped = Lists.newArrayList();
-
-                Preconditions.checkArgument(placeholders.length % 2 == 0, "Placeholders must be in pairs");
-                for (int i = 0; i < placeholders.length; i += 2) {
-                    mapped.add(new Pair<>(placeholders[i], placeholders[i + 1]));
-                }
-
-                for (Pair<String, String> pair : mapped) {
-                    builder.replaceLore(pair.left(), pair.right());
-                }
-            }
-        }
-
-        if (material == Material.PLAYER_HEAD && headTextureValue != null && headTextureSignature != null) {
-            PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
-            profile.setProperty(new ProfileProperty("textures", headTextureValue, headTextureSignature));
-
-            builder.setSkullOwner(profile);
-        }
-
-        if (glowing != null && glowing) {
-            builder.addEnchantment(GLOWING, 10);
-            builder.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-
-        if (customModelData != null) {
-            builder.setCustomModelData(customModelData);
-        }
-
-        return builder.build();
+    @CheckReturnValue
+    public Creator create() {
+        return new Creator(this);
     }
 
     /**
-     * Converts this YamlItemStack to an {@link ItemStack}.
-     * @return The ItemStack.
+     * Creates a new YamlItemStack with the specified properties.
+     * @return The YamlItemStack.
      */
     @NotNull
-    public ItemStack asItemStack(@Nullable Map.Entry<String, Component>... placeholders) {
-        Preconditions.checkNotNull(material, "Material must not be null");
-
-        ItemBuilder builder = new ItemBuilder(material, (amount == null ? 1 : amount));
-
-        if (displayName != null) {
-            builder.setName(displayName);
-
-            if (placeholders != null) {
-                for (Map.Entry<String, Component> entry : placeholders) {
-                    builder.replaceName(entry.getKey(), entry.getValue());
-                }
-            }
-
-        }
-
-        if (lore != null && !lore.isEmpty()) {
-            builder.setLore(lore);
-
-            if (placeholders != null) {
-                for (Map.Entry<String, Component> entry : placeholders) {
-                    builder.replaceLore(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        if (material == Material.PLAYER_HEAD && headTextureValue != null && headTextureSignature != null) {
-            PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID());
-            profile.setProperty(new ProfileProperty("textures", headTextureValue, headTextureSignature));
-
-            builder.setSkullOwner(profile);
-        }
-
-        if (glowing != null && glowing) {
-            builder.addEnchantment(GLOWING, 10);
-            builder.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        }
-
-        if (customModelData != null) {
-            builder.setCustomModelData(customModelData);
-        }
-
-        return builder.build();
+    @CheckReturnValue
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
-     * Sets the glowing enchantment.
-     * @param enchantment The enchantment.
+     * Builder for {@link YamlItemStack}
      */
-    public static void setGlowingEnchantment(@NotNull Enchantment enchantment) {
-        GLOWING = enchantment;
+    public static class Builder {
+        private String displayName = null;
+        private Material material = null;
+        private Integer amount = null;
+        private Integer slot = null;
+        private Boolean glowing = null;
+        private List<String> lore = null;
+        private Integer customModelData = null;
+
+        /**
+         * Sets the display name of the item.
+         * @param displayName The display name.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder displayName(@Nullable String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        /**
+         * Sets the material of the item.
+         * @param material The material.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder material(@NotNull Material material) {
+            this.material = material;
+            return this;
+        }
+
+        /**
+         * Sets the amount of the item.
+         * @param amount The amount.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder amount(int amount) {
+            Preconditions.checkArgument(amount > 0, "Amount must be greater than 0");
+
+            this.amount = amount;
+            return this;
+        }
+
+        /**
+         * Sets the slot of the item.
+         * @param slot The slot.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder slot(int slot) {
+            Preconditions.checkArgument(slot >= 0, "Slot must be greater than or equal to 0");
+            Preconditions.checkArgument(slot < 54, "Slot must be less than 54");
+
+            this.slot = slot;
+            return this;
+        }
+
+        /**
+         * Sets the glowing state of the item.
+         * @param glowing The glowing state.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder glowing(boolean glowing) {
+            this.glowing = glowing;
+            return this;
+        }
+
+        /**
+         * Sets the lore of the item.
+         * @param lore The lore.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder lore(@NotNull List<String> lore) {
+            this.lore = lore;
+            return this;
+        }
+
+        /**
+         * Sets the lore of the item.
+         * @param lore The lore.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder lore(@NotNull String... lore) {
+            return lore(Lists.newArrayList(lore));
+        }
+
+        /**
+         * Adds a line to the lore of the item.
+         * @param line The line to add.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder addLoreLine(@NotNull String line) {
+            if (lore == null) lore = Lists.newArrayList();
+
+            lore.add(line);
+            return this;
+        }
+
+        /**
+         * Sets the custom model data of the item.
+         * @param data The custom model data.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder customModelData(@NotNull Integer data) {
+            Preconditions.checkArgument(data > 0, "custom-model-data must be greater than 0");
+
+            this.customModelData = data;
+            return this;
+        }
+
+        /**
+         * Builds the item stack.
+         * @return The item stack.
+         */
+        @NotNull
+        @CheckReturnValue
+        public YamlItemStack build() {
+            return new YamlItemStack(
+                displayName,
+                material,
+                amount,
+                slot,
+                glowing,
+                lore,
+                customModelData
+            );
+        }
     }
+
+    /**
+     * Creator class to map {@link YamlItemStack} into {@link ItemStack}
+     */
+    @RequiredArgsConstructor
+    public static class Creator {
+
+        private final YamlItemStack stack;
+        private final Map<String, String> textPlaceholders = Maps.newConcurrentMap();
+        private final Map<String, Component> componentPlaceholders = Maps.newConcurrentMap();
+
+        /**
+         * Replaces a placeholder with a string.
+         * @param placeholder The placeholder to replace.
+         * @param replacement The replacement string.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Creator replace(@NotNull String placeholder, @NotNull String replacement) {
+            this.textPlaceholders.put(placeholder, replacement);
+            return this;
+        }
+
+        /**
+         * Replaces a placeholder with a component.
+         * @param placeholder The placeholder to replace.
+         * @param replacement The replacement component.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Creator replace(@NotNull String placeholder, @NotNull Component replacement) {
+            this.componentPlaceholders.put(placeholder, replacement);
+            return this;
+        }
+
+        /**
+         * Creates the item stack.
+         * @return The item stack.
+         */
+        @NotNull
+        public ItemStack create() {
+            Material material = stack.material;
+            Preconditions.checkNotNull(material, "Material must not be null");
+
+            Integer amount = stack.amount;
+            ItemBuilder builder = new ItemBuilder(material, (amount == null ? 1 : amount));
+
+            String displayName = stack.displayName;
+            if (displayName != null) {
+                String name = displayName;
+
+                for (Map.Entry<String, String> entry : textPlaceholders.entrySet()) {
+                    name = name.replace(entry.getKey(), entry.getValue());
+                }
+
+                Component component = ItemBuilder.MINIMESSAGE.deserialize(name);
+                for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
+                    component = component.replaceText(TextReplacementConfig.builder().match(entry.getKey()).replacement(entry.getValue()).build());
+                }
+
+                builder.setName(component);
+            }
+
+            List<String> lore = stack.lore;
+            if (lore != null && !lore.isEmpty()) {
+                // Use java streams to replace placeholders in lore
+                List<Component> components = lore.stream().map(s -> {
+                    for (Map.Entry<String, String> entry : textPlaceholders.entrySet()) {
+                        s = s.replace(entry.getKey(), entry.getValue());
+                    }
+                    return s;
+                }).map(s -> {
+                    Component component = ItemBuilder.MINIMESSAGE.deserialize(s);
+                    for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
+                        component = component.replaceText(TextReplacementConfig.builder().match(entry.getKey()).replacement(entry.getValue()).build());
+                    }
+                    return component;
+                }).collect(Collectors.toCollection(Lists::newArrayList));
+
+                builder.setLore(components);
+            }
+
+            Integer customModelData = stack.customModelData;
+            if (customModelData != null) {
+                builder.setCustomModelData(customModelData);
+            }
+
+            return builder.build();
+        }
+
+    }
+
 }

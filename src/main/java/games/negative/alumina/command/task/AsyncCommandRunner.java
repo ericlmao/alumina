@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,22 @@
  *
  */
 
-package games.negative.alumina.command;
+package games.negative.alumina.command.task;
 
-import org.jetbrains.annotations.NotNull;
+import games.negative.alumina.command.Command;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.List;
+@RequiredArgsConstructor
+public class AsyncCommandRunner extends BukkitRunnable {
 
-/**
- * TabCompleteProcessor is a functional interface used for tab completion processing.
- */
-@FunctionalInterface
-public interface TabCompleteProcessor {
+    private final Command command;
+    private final CommandSender sender;
+    private final String[] args;
 
-    List<String> onTabComplete(@NotNull TabContext context);
-
+    @Override
+    public void run() {
+        command.runCommand(sender, args);
+    }
 }

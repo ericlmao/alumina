@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +28,27 @@ package games.negative.alumina.command;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import games.negative.alumina.command.annotation.CommandInfo;
+import games.negative.alumina.command.builder.CommandBuilder;
+import games.negative.alumina.command.task.AsyncCommandRunner;
 import games.negative.alumina.message.Message;
 import games.negative.alumina.util.MathUtil;
+import games.negative.alumina.util.TabCompleteUtil;
+import games.negative.alumina.util.Tasks;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Getter
 @SuppressWarnings("unused")
@@ -51,105 +57,104 @@ public abstract class Command extends org.bukkit.command.Command {
     /**
      * The message for when the player does not have permission to use the command.
      */
-    private static final Message NO_PERMISSION = Message.of("<red>You do not have permission to use this command.");
+    private static final Message NO_PERMISSION = new Message("<red>You do not have permission to use this command.");
 
     /**
      * The message for when a player-only command is used as a console.
      */
-    private static final Message CANNOT_USE_AS_CONSOLE = Message.of("<red>You cannot use this command as console.");
+    private static final Message CANNOT_USE_AS_CONSOLE = new Message("<red>You cannot use this command as console.");
 
     /**
      * The message for when a console-only command is used as a player.
      */
-    private static final Message CANNOT_USE_AS_PLAYER = Message.of("<red>You cannot use this command as a player.");
+    private static final Message CANNOT_USE_AS_PLAYER = new Message("<red>You cannot use this command as a player.");
 
     /**
      * The message for when a command is used incorrectly.
      */
-    private static final Message USAGE = Message.of("<click:suggest_command:'/%command% %usage%'><red>Usage: <gray>/%command% %usage%</click>");
+    private static final Message USAGE = new Message("<click:suggest_command:'/%command% %usage%'><red>Usage: <gray>/%command% %usage%</click>");
 
-    /**
-     * The sub commands of this command.
-     */
+
     private final List<Command> subCommands;
-
-    /**
-     * The permissions of this command.
-     */
-    private final List<Permission> permissions;
-
-    /**
-     * The required parameters of this command.
-     */
-    private final List<String> params;
-
-    /**
-     * The shortcuts of this command.
-     */
+    private final Map<String, Function<TabContext, List<String>>> parameters;
     private final List<String> shortcuts;
-
-    /**
-     * The aliases of this command. Only applicable for subcommands
-     */
     private List<String> subAliases;
-
-    /**
-     * Whether this command is player-only.
-     */
     private final boolean playerOnly;
-
-    /**
-     * Whether this command is console-only.
-     */
     private final boolean consoleOnly;
-
-    /**
-     * Whether this command should use smart tab completion.
-     */
     private final boolean smartTabComplete;
+    private final boolean async;
 
-    /**
-     * The predicate to test the players against for tab completion.
-     */
-    private final Predicate<Player> tabCompleteViewRequirement;
-
-    /**
-     * The parent command of this command.
-     */
     private Command parent;
 
-    /**
-     * Constructs a new Command object with the given CommandProperties and optional parent Command.
-     *
-     * @param properties The properties of the command. Must not be null.
-     */
-    public Command(@NotNull CommandProperties properties) {
-        this(properties, null);
+    public Command() {
+        this((Command) null);
     }
 
-    /**
-     * The Command class represents a command with specific properties.
-     */
-    public Command(@NotNull CommandProperties properties, @Nullable Command parent) {
-        super(properties.name());
+    public Command(@Nullable Command parent) {
+        super("1");
+
         this.parent = parent;
+
+        CommandInfo annotation = getClass().getDeclaredAnnotation(CommandInfo.class);
+        Preconditions.checkNotNull(annotation, "If using empty constructor, class must have @CommandInfo annotation");
+
+        setName(annotation.name());
+        setAliases(Arrays.asList(annotation.aliases()));
+        setDescription(annotation.description());
+
         this.subCommands = Lists.newArrayList();
-        this.permissions = properties.permissions();
-        this.params = properties.params();
-        this.shortcuts = properties.shortcuts();
-        this.playerOnly = properties.playerOnly();
-        this.consoleOnly = properties.consoleOnly();
-        this.smartTabComplete = properties.smartTabComplete();
-        this.tabCompleteViewRequirement = properties.tabCompleteViewRequirement();
 
-        if (properties.aliases() != null)
-            applyAliases(properties);
+        setPermission((annotation.permission().isBlank()) ? null : annotation.permission());
+        if (!annotation.permission().isBlank()) {
+            try {
+                Bukkit.getPluginManager().addPermission(new Permission(annotation.permission()));
+            } catch (Exception ignored) {
+            }
+        }
 
-        if (properties.description() != null)
-            this.setDescription(properties.description());
+        this.shortcuts = Arrays.stream(annotation.shortcuts()).collect(Collectors.toCollection(Lists::newArrayList));
+        this.playerOnly = annotation.playerOnly();
+        this.consoleOnly = annotation.consoleOnly();
+        this.smartTabComplete = annotation.smartTabComplete();
+        this.async = annotation.async();
 
-        if (properties.usage() != null)
-            this.setUsage(properties.usage());
+        this.parameters = Maps.newLinkedHashMap();
+
+        for (String param : annotation.params()) {
+            parameters.put(param, null);
+        }
+    }
+
+    public Command(@NotNull CommandBuilder builder) {
+        this(builder, null);
+    }
+
+    public Command(@NotNull CommandBuilder builder, @Nullable Command parent) {
+        super(
+                builder.name(),
+                Optional.ofNullable(builder.description()).orElse(""),
+                Optional.ofNullable(builder.usage()).orElse(""),
+                Optional.ofNullable(builder.aliases()).orElse(Lists.newArrayList())
+        );
+
+        this.parent = parent;
+
+        this.subCommands = Lists.newArrayList();
+
+        setPermission((builder.permission() == null) ? null : Objects.requireNonNull(builder.permission()).getName());
+        if (builder.permission() != null) {
+            try {
+                Bukkit.getPluginManager().addPermission(Objects.requireNonNull(builder.permission()));
+            } catch (Exception ignored) {
+            }
+        }
+
+        this.shortcuts = Optional.ofNullable(builder.shortcuts()).orElse(Lists.newArrayList());
+        this.playerOnly = builder.playerOnly();
+        this.consoleOnly = builder.consoleOnly();
+        this.smartTabComplete = builder.smartTabComplete();
+        this.async = builder.async();
+        this.parameters = builder.parameters();
     }
 
     /**
@@ -157,7 +162,7 @@ public abstract class Command extends org.bukkit.command.Command {
      *
      * @param context The context of the command.
      */
-    public abstract void execute(@NotNull Context context);
+    public abstract void execute(@NotNull CommandContext context);
 
     /**
      * Executes the command.
@@ -169,17 +174,24 @@ public abstract class Command extends org.bukkit.command.Command {
      */
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-        // Long if-check, here's the breakdown:
-        // 1. Check if the console is using a player-only command,
-        //    or if the player is using a console-only command.
-        // 2. Check if the sender has the required permissions.
-        // 3. Check if there are any required parameters to be filled in.
-        // 4. Check if there are any subcommands to be executed before parent commands are executed.
-        if (checkConsolePlayerCommand(sender) || hasInvalidPermissions(sender, true) || !checkParams(sender, args) || checkSubCommands(sender, args))
+        if (!testPermissionSilent(sender)) {
+            NO_PERMISSION.create().send(sender);
+            return true;
+        }
+
+        if (this.async) {
+            Tasks.async(new AsyncCommandRunner(this, sender, args));
+            return true;
+        }
+        return runCommand(sender, args);
+    }
+
+    public boolean runCommand(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (checkConsolePlayerCommand(sender) || !checkParams(sender, args) || checkSubCommands(sender, args))
             return true;
 
         // If all requirements are met, execute the command.
-        Context context = new Context(args, sender);
+        CommandContext context = new CommandContext(args, sender);
         execute(context);
         return true;
     }
@@ -208,43 +220,14 @@ public abstract class Command extends org.bukkit.command.Command {
      * @return The modified command with the injected subcommand.
      * @throws NullPointerException if either properties or processor is null.
      */
-    public Command injectSubCommand(@NotNull CommandProperties properties, @NotNull ContextProcessor processor) {
+    public Command injectSubCommand(@NotNull CommandBuilder properties, @NotNull Consumer<CommandContext> processor) {
         Preconditions.checkNotNull(properties, "Properties cannot be null.");
         Preconditions.checkNotNull(processor, "Processor cannot be null.");
 
         Command command = new Command(properties, this) {
             @Override
-            public void execute(@NotNull Context context) {
-                processor.process(context);
-            }
-        };
-
-        return addSubCommand(command);
-    }
-
-    /**
-     * Injects a sub command into the current command.
-     *
-     * @param properties       The properties of the sub command.
-     * @param contextProcessor The context processor for the sub command.
-     * @param tabProcessor     The tab completion processor for the sub command.
-     * @return The modified command with the injected sub command.
-     * @throws NullPointerException if any of the parameters are null.
-     */
-    public Command injectSubCommand(@NotNull CommandProperties properties, @NotNull ContextProcessor contextProcessor, @NotNull TabCompleteProcessor tabProcessor) {
-        Preconditions.checkNotNull(properties, "Properties cannot be null.");
-        Preconditions.checkNotNull(contextProcessor, "Context processor cannot be null.");
-        Preconditions.checkNotNull(tabProcessor, "Tab processor cannot be null.");
-
-        Command command = new Command(properties, this) {
-            @Override
-            public void execute(@NotNull Context context) {
-                contextProcessor.process(context);
-            }
-
-            @Override
-            public List<String> onTabComplete(@NotNull TabContext context) {
-                return tabProcessor.onTabComplete(context);
+            public void execute(@NotNull CommandContext context) {
+                processor.accept(context);
             }
         };
 
@@ -277,13 +260,25 @@ public abstract class Command extends org.bukkit.command.Command {
         List<String> result = Lists.newArrayList();
 
         Multimap<Integer, Command> subMap = getRecursive(this, 0);
-        if (subMap.isEmpty()) return super.tabComplete(sender, alias, args);
+        if (subMap.isEmpty()) {
+            try {
+                String param = Lists.newArrayList(parameters.keySet()).get(placement);
+                Function<TabContext, List<String>> function = parameters.getOrDefault(param, null);
+                if (function == null) return List.of("<" + param + ">");
+
+                List<String> suggestions = function.apply(context);
+                if (suggestions == null || suggestions.isEmpty()) return List.of("<" + param + ">");
+
+                result.addAll(suggestions);
+            } catch (Exception ignored) {
+            }
+
+            return TabCompleteUtil.getSimilarStrings(result, current);
+        }
 
         Collection<Command> commands = subMap.get(placement);
         for (Command command : commands) {
-            if (hasInvalidPermissions(sender, false)) continue;
-
-            if (tabCompleteViewRequirement != null && !tabCompleteViewRequirement.test((Player) sender)) continue;
+            if (!testPermissionSilent(sender)) continue;
 
             List<String> match = Lists.newArrayList(command.getName());
             match.addAll(command.getAliases());
@@ -305,7 +300,7 @@ public abstract class Command extends org.bukkit.command.Command {
                     .filter(command -> command.getName().equalsIgnoreCase(arg) || command.getAliases().contains(arg.toLowerCase()) || (command.subAliases != null && command.subAliases.contains(arg.toLowerCase())))
                     .findFirst().orElse(null);
 
-            if (cmd == null || hasInvalidPermissions(sender, false) || (tabCompleteViewRequirement != null && !tabCompleteViewRequirement.test((Player) sender))) continue;
+            if (cmd == null || !testPermissionSilent(sender)) continue;
 
             List<String> completion = cmd.onTabComplete(context);
             if (completion != null && !completion.isEmpty()) {
@@ -315,13 +310,25 @@ public abstract class Command extends org.bukkit.command.Command {
 
             int depth = (MathUtil.absDiff(i, placement) - 1);
             try {
-                String param = cmd.getParams().get(depth);
-                result.add("[<" + param + ">]");
+                String param = Lists.newArrayList(cmd.parameters.keySet()).get(depth);
+                Function<TabContext, List<String>> function = cmd.parameters.getOrDefault(param, null);
+                if (function == null) {
+                    result.add("<" + param + ">");
+                    continue;
+                }
+
+                List<String> suggestions = function.apply(context);
+                if (suggestions == null || suggestions.isEmpty()) {
+                    result.add("<" + param + ">");
+                    continue;
+                }
+
+                result.addAll(suggestions);
             } catch (Exception ignored) {
             }
         }
 
-        return result;
+        return TabCompleteUtil.getSimilarStrings(result, current);
     }
 
     /**
@@ -361,37 +368,16 @@ public abstract class Command extends org.bukkit.command.Command {
         Preconditions.checkNotNull(sender, "Sender cannot be null.");
 
         if (!(sender instanceof Player) && playerOnly) {
-            CANNOT_USE_AS_CONSOLE.send(sender);
+            CANNOT_USE_AS_CONSOLE.create().send(sender);
             return true;
         }
 
         if (sender instanceof Player && consoleOnly) {
-            CANNOT_USE_AS_PLAYER.send(sender);
+            CANNOT_USE_AS_PLAYER.create().send(sender);
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * Checks the permissions of a command sender.
-     *
-     * @param sender  The command sender.
-     * @param message Flag indicating whether to send a no permission message to the sender.
-     * @return True if the sender has the required permissions, false otherwise.
-     */
-    private boolean hasInvalidPermissions(@NotNull final CommandSender sender, final boolean message) {
-        Preconditions.checkNotNull(sender, "Sender cannot be null.");
-
-        if (this.permissions == null) return false;
-
-        for (Permission permission : this.permissions) {
-            if (sender.hasPermission(permission))
-                return false;
-        }
-
-        if (message) NO_PERMISSION.send(sender);
-        return true;
     }
 
     /**
@@ -411,7 +397,9 @@ public abstract class Command extends org.bukkit.command.Command {
         String[] snippet = Arrays.copyOfRange(args, 1, args.length);
 
         Command subCommand = getAvailableSubCommand(begin);
-        return (subCommand != null && subCommand.execute(sender, begin, snippet));
+        if (subCommand == null) return false;
+
+        return subCommand.execute(sender, begin, snippet);
     }
 
     /**
@@ -443,42 +431,41 @@ public abstract class Command extends org.bukkit.command.Command {
         Preconditions.checkNotNull(sender, "Sender cannot be null.");
         Preconditions.checkNotNull(args, "Arguments cannot be null.");
 
-        if (this.params == null)
-            return true;
+        if (this.parameters == null || this.parameters.isEmpty()) return true;
 
-        if (args.length < params.size()) {
-            StringBuilder builder = new StringBuilder();
-            for (String param : params)
-                builder.append("<").append(param).append(">").append(" ");
+        if (args.length >= this.parameters.size()) return true;
 
-            List<String> parentNames = Lists.newArrayList();
-            parentNames.add(getName());
+        StringBuilder builder = new StringBuilder();
+        for (String param : parameters.keySet())
+            builder.append("<").append(param).append(">").append(" ");
 
-            Command search = this;
-            while (search.getParent() != null) {
-                parentNames.add(search.getParent().getName());
-                search = search.getParent();
-            }
+        List<String> parentNames = Lists.newArrayList();
+        parentNames.add(getName());
 
-            Collections.reverse(parentNames);
-
-            StringBuilder parentBuilder = new StringBuilder();
-
-            int iteration = 0;
-            for (String parentName : parentNames) {
-                if (iteration != 0)
-                    parentBuilder.append(" ");
-
-                parentBuilder.append(parentName);
-
-                iteration++;
-            }
-
-            USAGE.send(sender, "%command%", parentBuilder.toString(), "%usage%", builder.toString());
-            return false;
+        Command search = this;
+        while (search.getParent() != null) {
+            parentNames.add(search.getParent().getName());
+            search = search.getParent();
         }
 
-        return true;
+        Collections.reverse(parentNames);
+
+        StringBuilder parentBuilder = new StringBuilder();
+
+        int iteration = 0;
+        for (String parentName : parentNames) {
+            if (iteration != 0)
+                parentBuilder.append(" ");
+
+            parentBuilder.append(parentName);
+
+            iteration++;
+        }
+
+        USAGE.create().replace("%command%", parentBuilder.toString())
+                .replace("%usage%", builder.toString())
+                .send(sender);
+        return false;
     }
 
     /**
@@ -486,7 +473,7 @@ public abstract class Command extends org.bukkit.command.Command {
      *
      * @param properties The properties of the command. Must not be null.
      */
-    private void applyAliases(@NotNull CommandProperties properties) {
+    private void applyAliases(@NotNull CommandBuilder properties) {
         List<String> aliases = properties.aliases();
         assert aliases != null; // Checked in the constructor
 

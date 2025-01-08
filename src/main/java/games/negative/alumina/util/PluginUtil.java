@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +23,22 @@
  *
  */
 
+package games.negative.alumina.util;
 
-package games.negative.alumina.model;
-
+import lombok.experimental.UtilityClass;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * The Keyd interface represents an object that has a key associated with it.
- *
- * @param <T> the type of the key
- */
-public interface Keyd<T> {
+@UtilityClass
+public class PluginUtil {
 
     /**
-     * Returns the key associated with the object.
-     *
-     * @return the key
+     * Checks if a plugin is on the server.
+     * @param name The name of the plugin.
+     * @return True if the plugin is on the server.
      */
-    @NotNull
-    T key();
-
-    /**
-     * Sets the key for the object.
-     *
-     * @param key the key to set
-     * @throws UnsupportedOperationException if setting the key is not supported by the object
-     */
-    default void setKey(@NotNull T key) {
-        throw new UnsupportedOperationException("This object does not support setting the key.");
+    public boolean hasPlugin(@NotNull String name) {
+        return Bukkit.getPluginManager().getPlugin(name) != null;
     }
 
 }

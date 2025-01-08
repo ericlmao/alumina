@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,32 +23,46 @@
  *
  */
 
-package games.negative.alumina.position;
+package games.negative.alumina.command;
 
-import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 /**
- * The Locatable interface provides methods to get and set the location of an object.
+ * This class is used to represent the context of a command when executed.
+ * @param args The arguments of the command
+ * @param sender The sender of the command
  */
-public interface Locatable {
+public record CommandContext(@NotNull String[] args, @NotNull CommandSender sender) {
 
     /**
-     * Retrieves the location of the object.
-     *
-     * @return The location of the object.
+     * Returns the player who executed the command.
+     * @return the player who executed the command.
      */
     @NotNull
-    Location getLocation();
+    public Optional<Player> player() {
+        return sender() instanceof Player ? Optional.of((Player) sender()) : Optional.empty();
+    }
 
     /**
-     * Sets the location of the object.
-     *
-     * @param location the location to set
-     * @throws UnsupportedOperationException if the object does not allow setting its location
+     * Returns the argument at the specified index.
+     * @param index The index of the argument.
+     * @return the argument at the specified index.
      */
-    default void setLocation(@NotNull Location location) {
-        throw new UnsupportedOperationException("This object does not allow setting its location");
+    @NotNull
+    public Optional<String> argument(final int index) {
+        return (index >= args.length ? Optional.empty() : Optional.of(args[index]));
+    }
+
+    /**
+     * Returns the length of the arguments.
+     * @return the length of the arguments.
+     */
+    public int length() {
+        return args.length;
     }
 
 }

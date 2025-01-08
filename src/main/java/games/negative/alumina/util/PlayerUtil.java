@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,6 @@ package games.negative.alumina.util;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
-import games.negative.alumina.future.BukkitCompletableFuture;
-import games.negative.alumina.future.BukkitFuture;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.title.Title;
@@ -39,7 +37,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -78,7 +76,6 @@ public class PlayerUtil {
         player.setWalkSpeed(0.2F);
         player.setAllowFlight(false);
         player.setFlying(false);
-        player.getOpenInventory().close();
         player.getInventory().clear();
         player.getInventory().setArmorContents(null);
         player.setHealth(20);
@@ -106,7 +103,7 @@ public class PlayerUtil {
     private void resetHealth(@NotNull Player player) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
 
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        AttributeInstance attribute = player.getAttribute(Attribute.MAX_HEALTH);
         if (attribute == null) return;
 
         Collection<AttributeModifier> modifiers = attribute.getModifiers();
@@ -184,38 +181,6 @@ public class PlayerUtil {
                 .replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5");
 
         return UUID.fromString(uuidStr);
-    }
-
-    /**
-     * Retrieves an OfflinePlayer object for the given username.
-     *
-     * @param username The username of the player.
-     * @return A BukkitFuture object that completes with the OfflinePlayer.
-     * @throws NullPointerException if 'username' is null.
-     */
-    public BukkitFuture<OfflinePlayer> getOfflinePlayer(@NotNull String username) {
-        Preconditions.checkNotNull(username, "'username' cannot be null!");;
-
-        BukkitFuture<OfflinePlayer> future = new BukkitCompletableFuture<>();
-        BukkitFuture<UUID> uuidFuture = new BukkitCompletableFuture<>();
-        uuidFuture.supplyAsync(() -> {
-            try {
-                return getByName(username);
-            } catch (IOException e) {
-                return null;
-            }
-        });
-
-        uuidFuture.whenCompleteAsync(uuid -> {
-            if (uuid == null) {
-                future.cancel();
-                return;
-            }
-
-            future.supply(() -> Bukkit.getOfflinePlayer(uuid));
-        });
-
-        return future;
     }
 
     /**
@@ -365,12 +330,14 @@ public class PlayerUtil {
      * @param world The name of the world.
      * @return {@code true} if the player is in the world, {@code false} otherwise.
      * @throws NullPointerException if {@code player} or {@code world} is null.
+     * @deprecated Use {@link LocationUtil#isInWorld(Location, String)}
      */
+    @Deprecated
     public boolean isInWorld(@NotNull Player player, @NotNull String world) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
         Preconditions.checkNotNull(world, "'world' cannot be null!");
 
-        return player.getWorld().getName().equalsIgnoreCase(world);
+        return LocationUtil.isInWorld(player.getLocation(), world);
     }
 
     /**
@@ -380,16 +347,13 @@ public class PlayerUtil {
      * @param worlds The names of the worlds.
      * @return {@code true} if the player is in any of the worlds, {@code false} otherwise.
      * @throws NullPointerException if {@code player} or {@code worlds} is null.
+     * @deprecated Use {@link LocationUtil#isInWorld(Location, String...)}
      */
+    @Deprecated
     public boolean isInWorld(@NotNull Player player, @NotNull String... worlds) {
         Preconditions.checkNotNull(player, "'player' cannot be null!");
         Preconditions.checkNotNull(worlds, "'worlds' cannot be null!");
 
-        String current = player.getWorld().getName();
-        for (String world : worlds) {
-            if (current.equalsIgnoreCase(world)) return true;
-        }
-
-        return false;
+        return LocationUtil.isInWorld(player.getLocation(), worlds);
     }
 }

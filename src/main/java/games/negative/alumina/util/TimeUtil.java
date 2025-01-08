@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -289,7 +289,12 @@ public class TimeUtil {
                 builder.append(entry);
             }
 
-            return builder.toString();
+            String string = builder.toString();
+
+            char last = string.charAt(string.length() - 1);
+            if (last == ' ') string = string.substring(0, string.length() - 1);
+
+            return string;
         }
     }
 }

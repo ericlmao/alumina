@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,350 +23,209 @@
  *
  */
 
-
-
 package games.negative.alumina.message;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import games.negative.alumina.logger.Logs;
-import games.negative.alumina.util.MiniMessageUtil;
+import games.negative.alumina.message.translation.LegacyMiniMessageTranslator;
+import games.negative.alumina.util.PluginUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.Tag;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a message that can be sent to a {@link Audience}.
- * <p>
- * This supports color codes, placeholders, and hex colors.
- * <p>
+ * Represents a MiniMessage message with placeholders.
  */
-@SuppressWarnings("unused")
 public class Message {
 
-    private static Component PREFIX;
+    private static MiniMessage DEFAULT_PROVIDER = MiniMessage.miniMessage();
 
-    private static final Map<String, Tag> CUSTOM_TAGS = Maps.newConcurrentMap();
-
-    private static MiniMessage miniMessage;
-
-    /*
-     * This is the default, unmodified message.
-     */
     private final String content;
 
     /**
-     * Whether to parse PlaceholderAPI placeholders.
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
      */
-    private final boolean papi;
-
-
-    /**
-     * Creates a new message.
-     *
-     * @param text The text of the message.
-     */
-    public Message(@NotNull final String text) {
-        Preconditions.checkNotNull(text, "Text cannot be null.");
-
-        this.content = text;
-        this.papi = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+    public Message(@NotNull String content) {
+        this.content = content;
     }
 
     /**
-     * Send the final message to a {@link Audience}.
-     *
-     * @param audience The recipient of the message.
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
      */
-    public void send(@NotNull Audience audience, @Nullable String... placeholders) {
-        Preconditions.checkNotNull(audience, "Audience cannot be null.");
-
-        Component component = asComponent(audience, placeholders);
-        audience.sendMessage(component);
+    public Message(@NotNull String... content) {
+        this(String.join("<newline>", content));
     }
 
     /**
-     * Send the final message to a {@link Audience}.
-     *
-     * @param audience The recipient of the message.
-     */
-    @SafeVarargs
-    public final void send(@NotNull Audience audience, @Nullable Map.Entry<String, Component>... placeholders) {
-        Preconditions.checkNotNull(audience, "Audience cannot be null.");
-
-        Component component = asComponent(audience, placeholders);
-        audience.sendMessage(component);
-    }
-
-    /**
-     * Send the final message to a {@link Audience}.
-     *
-     * @param audience The recipient of the message.
-     */
-    public void send(@NotNull Audience audience) {
-        Preconditions.checkNotNull(audience, "Audience cannot be null.");
-
-        Component component = asComponent(audience);
-        audience.sendMessage(component);
-    }
-
-    /**
-     * Send the final message to an iterable collection of a class that extends {@link Audience}
-     * @param iterable The iterable collection of a class that extends {@link Audience}
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     * @param <T> The class that extends {@link Audience}
-     */
-    public <T extends Iterable<? extends Audience>> void send(@NotNull T iterable, @Nullable String... placeholders) {
-        Preconditions.checkNotNull(iterable, "Iterable cannot be null.");
-        Preconditions.checkArgument(iterable.iterator().hasNext(), "Iterable cannot be empty.");
-
-        for (Audience audience : iterable) {
-            send(audience, placeholders);
-        }
-    }
-
-    /**
-     * Send the final message to an iterable collection of a class that extends {@link Audience}
-     * @param iterable The iterable collection of a class that extends {@link Audience}
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     * @param <T> The class that extends {@link Audience}
-     */
-    public <T extends Iterable<? extends Audience>> void send(@NotNull T iterable, @Nullable Map.Entry<String, Component>... placeholders) {
-        Preconditions.checkNotNull(iterable, "Iterable cannot be null.");
-        Preconditions.checkArgument(iterable.iterator().hasNext(), "Iterable cannot be empty.");
-
-        for (Audience audience : iterable) {
-            send(audience, placeholders);
-        }
-    }
-
-    /**
-     * Send the final message to an iterable collection of a class that extends {@link Audience}
-     * @param iterable The iterable collection of a class that extends {@link Audience}
-     * @param <T> The class that extends {@link Audience}
-     */
-    public <T extends Iterable<? extends Audience>> void send(@NotNull T iterable) {
-        Preconditions.checkNotNull(iterable, "Iterable cannot be null.");
-        Preconditions.checkArgument(iterable.iterator().hasNext(), "Iterable cannot be empty.");
-
-        for (Audience audience : iterable) {
-            send(audience);
-        }
-    }
-
-    /**
-     * Broadcast the final message to the server.
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     */
-    public void broadcast(@Nullable String... placeholders) {
-        broadcast(null, placeholders);
-    }
-
-    /**
-     * Broadcast the final message to the server.
-     * @param audience The audience to display the message to.
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     */
-    public void broadcast(@Nullable Audience audience, @Nullable String... placeholders) {
-        Component component = asComponent(audience, placeholders);
-        Bukkit.getServer().broadcast(component);
-    }
-
-    /**
-     * Broadcast the final message to the server.
-     */
-    public void broadcast() {
-        broadcast(null, (String[]) null);
-    }
-
-    /**
-     * Converts the message to a Component.
-     * @param audience The audience to display the message to.
-     * @return The Component representation of the message.
-     */
-    @NotNull
-    public Component asComponent(@Nullable Audience audience) {
-        return asComponent(audience, (String[]) null);
-    }
-
-    /**
-     * Converts the message to a Component.
-     *
-     * @param audience     The audience to display the message to.
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     * @return The Component representation of the message.
-     * @throws NullPointerException     if the audience is null.
-     * @throws IllegalArgumentException if the number of placeholders is not even.
-     */
-    @NotNull
-    public Component asComponent(@Nullable Audience audience, @Nullable String... placeholders) {
-        String current = content;
-        if (papi) {
-            current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders((audience instanceof Player player ? player : null), current);
-        }
-
-        if (placeholders != null) {
-            Preconditions.checkArgument(placeholders.length % 2 == 0, "Placeholders must be in key-value pairs.");
-
-            for (int i = 0; i < placeholders.length; i += 2) {
-                String placeholder = placeholders[i];
-                String replacement = placeholders[i + 1];
-
-                if (placeholder == null || replacement == null) {
-                    Logs.warning("Placeholder of " + placeholder + " has result of " + replacement + ". None of these value can be null. Skipping.", true);
-                    continue;
-                }
-
-                current = current.replaceAll(placeholder, replacement);
-            }
-        }
-
-        if (miniMessage == null) {
-            miniMessage = MiniMessage.builder().editTags(builder -> {
-                for (Map.Entry<String, Tag> entry : CUSTOM_TAGS.entrySet()) {
-                    builder.tag(entry.getKey(), entry.getValue());
-                }
-            }).build();
-        }
-
-        Component component = MiniMessageUtil.translate(current, miniMessage);
-        if (PREFIX != null) {
-            component = component.replaceText(TextReplacementConfig.builder().matchLiteral("%prefix%").replacement(PREFIX).build());
-        }
-
-        return component;
-    }
-
-    /**
-     * Converts the message to a Component.
-     *
-     * @param audience     The audience to display the message to.
-     * @param placeholders The optional key-value pairs of placeholders to replace in the message.
-     * @return The Component representation of the message.
-     * @throws NullPointerException     if the audience is null.
-     * @throws IllegalArgumentException if the number of placeholders is not even.
-     */
-    @SafeVarargs
-    @NotNull
-    public final Component asComponent(@Nullable Audience audience, @Nullable Map.Entry<String, Component>... placeholders) {
-        String current = content;
-        if (papi) {
-            current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders((audience instanceof Player player ? player : null), current);
-        }
-
-        if (miniMessage == null) {
-            miniMessage = MiniMessage.builder().editTags(builder -> {
-                for (Map.Entry<String, Tag> entry : CUSTOM_TAGS.entrySet()) {
-                    builder.tag(entry.getKey(), entry.getValue());
-                }
-            }).build();
-        }
-
-        Component component = MiniMessageUtil.translate(current, miniMessage);
-        if (PREFIX != null) {
-            component = component.replaceText(TextReplacementConfig.builder().matchLiteral("%prefix%").replacement(PREFIX).build());
-        }
-
-        if (placeholders != null) {
-            for (Map.Entry<String, Component> placeholder : placeholders) {
-                if (placeholder == null) continue;
-
-                String key = placeholder.getKey();
-                Component value = placeholder.getValue();
-
-                if (key == null || value == null) {
-                    Logs.warning("Placeholder of " + key + " has result of " + value + ". None of these value can be null. Skipping.", true);
-                    continue;
-                }
-
-                component = component.replaceText(TextReplacementConfig.builder().matchLiteral(key).replacement(value).build());
-            }
-        }
-
-        return component;
-    }
-
-    /**
-     * Returns the content of the message.
-     *
+     * Get the content of the message.
      * @return The content of the message.
      */
     @NotNull
     public String content() {
-        return this.content;
+        return content;
     }
 
     /**
-     * Statically create a new message instance using {@link Message#of(String...)}
-     *
-     * @param text The text of the message.
-     * @return The message.
+     * Get the content of the message as a list.
+     * @return The content of the message as a list.
      */
-    public static Message of(@NotNull final String... text) {
-        Preconditions.checkNotNull(text, "Text cannot be null.");
-        Preconditions.checkArgument(text.length > 0, "Text cannot be empty.");
-
-        return new Message(String.join("\n", text));
+    @NotNull
+    @Unmodifiable
+    public List<String> contentList() {
+        return List.of(content.split("<newline>"));
     }
 
-    /**
-     * Statically create a new message instance using {@link Message#of(String)}
-     *
-     * @param text The text of the message.
-     * @return The message.
-     */
-    public static Message of(@NotNull final String text) {
-        Preconditions.checkNotNull(text, "Text cannot be null.");
 
-        return new Message(text);
-    }
-
-    /**
-     * Statically create a new message instance using {@link Message#of(List)}
-     *
-     * @param text The text of the message.
-     * @return The message.
-     */
-    public static Message of(@NotNull final List<String> text) {
-        Preconditions.checkNotNull(text, "Text cannot be null.");
-        Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty.");
-
-        return new Message(String.join("\n", text));
-    }
-
-    /**
-     * Register a custom minimessage tag for global use in all messages.
-     * @param name The name of the tag.
-     * @param tag The tag to register.
-     */
-    public static void registerTag(@NotNull String name, @NotNull Tag tag) {
-        CUSTOM_TAGS.put(name, tag);
-    }
-
-    /**
-     * Set the prefix of the message.
-     * @param component The prefix of the message.
-     */
-    public static void setPrefix(@Nullable Component component) {
-        PREFIX = component;
-    }
-
-    @Nullable
-    public static Component prefix() {
-        return PREFIX;
+    @NotNull
+    @CheckReturnValue
+    public Builder create() {
+        return new Builder();
     }
 
     @NotNull
-    public static Map<String, Tag> customTags() {
-        return CUSTOM_TAGS;
+    @CheckReturnValue
+    public Builder create(@NotNull MiniMessage provider) {
+        return new Builder(provider);
+    }
+
+    /**
+     * Sets the default provider for all messages.
+     * @param instance The provider to use.
+     */
+    public static void setDefaultProvider(@NotNull MiniMessage instance) {
+        DEFAULT_PROVIDER = instance;
+    }
+
+    public class Builder {
+
+        private String current = content;
+        private final MiniMessage provider;
+        private final Map<String, String> stringPlaceholders = Maps.newHashMap();
+        private final Map<String, Component> componentPlaceholders = Maps.newHashMap();
+
+        /**
+         * Creates a new builder instance with the default provider.
+         */
+        public Builder() {
+            this(DEFAULT_PROVIDER);
+        }
+
+        /**
+         * Creates a new builder instance with the specified provider.
+         * @param provider The provider to use.
+         */
+        public Builder(@NotNull MiniMessage provider) {
+            this.provider = provider;
+        }
+
+        /**
+         * Replaces a placeholder with a string.
+         * @param placeholder The placeholder to replace.
+         * @param replacement The replacement string.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder replace(@NotNull String placeholder, @NotNull String replacement) {
+            stringPlaceholders.put(placeholder, replacement);
+            return this;
+        }
+
+        /**
+         * Replaces a placeholder with a component.
+         * @param placeholder The placeholder to replace.
+         * @param replacement The replacement component.
+         * @return The builder instance.
+         */
+        @NotNull
+        @CheckReturnValue
+        public Builder replace(@NotNull String placeholder, @NotNull Component replacement) {
+            componentPlaceholders.put(placeholder, replacement);
+            return this;
+        }
+
+        /**
+         * Sends the message to the recipient.
+         * @param recipient The recipient of the message.
+         * @param <T> The type of the recipient.
+         */
+        public <T extends Audience> void send(@NotNull T recipient) {
+            Component component = asComponent(recipient);
+            recipient.sendMessage(component);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @return The component representation of the message.
+         */
+        @NotNull
+        public Component asComponent() {
+            return asComponent(null);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @param viewer The viewer of the message.
+         * @return The component representation of the message.
+         * @param <V> The type of the viewer.
+         */
+        @NotNull
+        public <V extends Audience> Component asComponent(@Nullable V viewer) {
+            // Replacements for pre-serialized strings
+            for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
+                current = current.replaceAll(entry.getKey(), entry.getValue());
+            }
+
+            // Parse legacy color codes if available.
+            if (current.contains("&")) {
+                current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
+            }
+
+            // Parse PlaceholderAPI if available.
+            if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                Player player = (viewer instanceof Player) ? (Player) viewer : null;
+                current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, current);
+            }
+
+            Component component = provider.deserialize(current);
+
+            // Replacements for components
+            for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
+                component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
+            }
+
+            // Parse ItemsAdder unicodes if available.
+            if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
+                component = parseItemsAdder(player, component);
+            }
+
+            return component;
+        }
+    }
+
+    private Component parseItemsAdder(@NotNull Player player, @NotNull Component component) {
+        try {
+            Class.forName("dev.lone.itemsadder.api.FontImages");
+
+            Class<?> clazz = Class.forName("dev.lone.itemsadder.api.FontImages.FontImageWrapper");
+            Object method = clazz.getDeclaredMethod("replaceFontImages", Permissible.class, Component.class).invoke(null, player, component);
+            return (Component) method;
+        } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+            return component;
+        }
     }
 }
+

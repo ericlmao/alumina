@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- * Copyright (C) 2024 Negative Games
+ * Copyright (C) 2025 Negative Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -511,9 +511,9 @@ public class NumberUtil {
         ItemMeta meta = tool.getItemMeta();
         if (meta == null) return initial;
 
-        if (!meta.hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) return initial;
+        if (!meta.hasEnchant(Enchantment.FORTUNE)) return initial;
 
-        int level = meta.getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+        int level = meta.getEnchantLevel(Enchantment.FORTUNE);
 
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int i = Math.max((random.nextInt(1, level + 2) - 1), 0);
