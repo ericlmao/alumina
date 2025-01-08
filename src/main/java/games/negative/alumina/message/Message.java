@@ -38,8 +38,10 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,6 +68,26 @@ public class Message {
     public Message(@NotNull String... content) {
         this(String.join("<newline>", content));
     }
+
+    /**
+     * Get the content of the message.
+     * @return The content of the message.
+     */
+    @NotNull
+    public String content() {
+        return content;
+    }
+
+    /**
+     * Get the content of the message as a list.
+     * @return The content of the message as a list.
+     */
+    @NotNull
+    @Unmodifiable
+    public List<String> contentList() {
+        return List.of(content.split("<newline>"));
+    }
+
 
     @NotNull
     @CheckReturnValue
