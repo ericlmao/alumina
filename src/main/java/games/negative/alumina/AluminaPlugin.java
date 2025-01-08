@@ -29,7 +29,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import games.negative.alumina.event.Events;
 import games.negative.alumina.menu.listener.MenuListener;
-import games.negative.alumina.util.FileLoader;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -191,15 +190,6 @@ public abstract class AluminaPlugin extends JavaPlugin {
 
         Events.listen(listener);
     }
-
-    /**
-     * This method is used to load a file from the plugin's resources folder.
-     * @param name The name of the file to load.
-     */
-    public void loadFile(@NotNull String name) {
-        FileLoader.loadFile(this, name);
-    }
-
 
     @Override
     public void onLoad() {
