@@ -29,6 +29,7 @@ package games.negative.alumina.logger;
 import games.negative.alumina.AluminaPlugin;
 import games.negative.alumina.util.MiniMessageUtil;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +55,12 @@ public enum Logs {
     /**
      * This constant represents the SEVERE level of logs. The log message at this level indicates a serious error that may prevent the application from functioning correctly.
      */
-    SEVERE(Level.SEVERE);
+    SEVERE(Level.SEVERE),
+
+    /**
+     * This constant represents a custom log level. It is used to print log messages with a custom level.
+     */
+    CUSTOM(null);
 
     private final Level level;
 
@@ -69,7 +75,21 @@ public enum Logs {
     public void print(@NotNull String content, boolean force) {
         if (disabled && !force) return;
 
+        if (this == CUSTOM) {
+            printCustom(content);
+            return;
+        }
+
         AluminaPlugin.getAluminaInstance().getLogger().log(level, content);
+    }
+
+    /**
+     * This method is used to print a custom log message with the given content.
+     * @param content The content of the log message.
+     */
+    private void printCustom(@NotNull String content) {
+        Component component = MiniMessageUtil.translate(content);
+        Bukkit.getConsoleSender().sendMessage(component);
     }
 
     /**
