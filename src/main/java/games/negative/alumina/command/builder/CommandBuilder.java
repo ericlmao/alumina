@@ -27,7 +27,7 @@ package games.negative.alumina.command.builder;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-import org.bukkit.command.CommandSender;
+import games.negative.alumina.command.TabContext;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +44,7 @@ public class CommandBuilder {
     private String description = null;
     private String usage = null;
     private Permission permission = null;
-    private Map<String, Function<CommandSender, List<String>>> parameters = null;
+    private Map<String, Function<TabContext, List<String>>> parameters = null;
     private List<String> shortcuts = null;
     private boolean playerOnly = false;
     private boolean consoleOnly = false;
@@ -324,7 +324,7 @@ public class CommandBuilder {
      * @return the parameters of the command
      */
     @Nullable
-    public Map<String, Function<CommandSender, List<String>>> parameters() {
+    public Map<String, Function<TabContext, List<String>>> parameters() {
         return parameters;
     }
 
@@ -347,7 +347,7 @@ public class CommandBuilder {
      */
     @NotNull
     @CheckReturnValue
-    public CommandBuilder parameter(@NotNull String name, @Nullable Function<CommandSender, List<String>> suggestions) {
+    public CommandBuilder parameter(@NotNull String name, @Nullable Function<TabContext, List<String>> suggestions) {
         Preconditions.checkNotNull(name, "name cannot be null");
 
         // Init map if null

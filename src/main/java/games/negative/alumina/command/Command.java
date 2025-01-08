@@ -28,6 +28,7 @@ package games.negative.alumina.command;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import games.negative.alumina.command.annotation.CommandInfo;
 import games.negative.alumina.command.builder.CommandBuilder;
@@ -75,8 +76,7 @@ public abstract class Command extends org.bukkit.command.Command {
 
 
     private final List<Command> subCommands;
-    private final List<String> params;
-    private final Map<String, Function<CommandSender, List<String>>> parameters;
+    private final Map<String, Function<TabContext, List<String>>> parameters;
     private final List<String> shortcuts;
     private List<String> subAliases;
     private final boolean playerOnly;
@@ -112,13 +112,17 @@ public abstract class Command extends org.bukkit.command.Command {
             }
         }
 
-        this.params = Arrays.stream(annotation.params()).collect(Collectors.toCollection(Lists::newArrayList));
         this.shortcuts = Arrays.stream(annotation.shortcuts()).collect(Collectors.toCollection(Lists::newArrayList));
         this.playerOnly = annotation.playerOnly();
         this.consoleOnly = annotation.consoleOnly();
         this.smartTabComplete = annotation.smartTabComplete();
         this.async = annotation.async();
-        this.parameters = null; // builder-style only
+
+        this.parameters = Maps.newLinkedHashMap();
+
+        for (String param : annotation.params()) {
+            parameters.put(param, null);
+        }
     }
 
     public Command(@NotNull CommandBuilder builder) {
@@ -151,10 +155,6 @@ public abstract class Command extends org.bukkit.command.Command {
         this.smartTabComplete = builder.smartTabComplete();
         this.async = builder.async();
         this.parameters = builder.parameters();
-        this.params = Optional.ofNullable(parameters).stream()
-                .map(Map::keySet)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toCollection(Lists::newArrayList));
     }
 
     /**
@@ -262,18 +262,14 @@ public abstract class Command extends org.bukkit.command.Command {
         Multimap<Integer, Command> subMap = getRecursive(this, 0);
         if (subMap.isEmpty()) {
             try {
-                String param = getParams().get(placement);
-                if (parameters != null) {
-                    Function<CommandSender, List<String>> function = parameters.getOrDefault(param, null);
-                    if (function == null) return List.of("[<" + param + ">]");
+                String param = Lists.newArrayList(parameters.keySet()).get(placement);
+                Function<TabContext, List<String>> function = parameters.getOrDefault(param, null);
+                if (function == null) return List.of("<" + param + ">");
 
-                    List<String> suggestions = function.apply(sender);
-                    if (suggestions == null || suggestions.isEmpty()) return List.of("[<" + param + ">]");
+                List<String> suggestions = function.apply(context);
+                if (suggestions == null || suggestions.isEmpty()) return List.of("<" + param + ">");
 
-                    result.addAll(suggestions);
-                } else {
-                    result.add("[<" + param + ">]");
-                }
+                result.addAll(suggestions);
             } catch (Exception ignored) {
             }
 
@@ -314,25 +310,20 @@ public abstract class Command extends org.bukkit.command.Command {
 
             int depth = (MathUtil.absDiff(i, placement) - 1);
             try {
-                String param = cmd.getParams().get(depth);
-                if (cmd.parameters != null) {
-                    Function<CommandSender, List<String>> function = cmd.parameters.getOrDefault(param, null);
-                    if (function == null) {
-                        result.add("[<" + param + ">]");
-                        continue;
-                    }
-
-                    List<String> suggestions = function.apply(sender);
-                    if (suggestions == null || suggestions.isEmpty()) {
-                        result.add("[<" + param + ">]");
-                        continue;
-                    }
-
-                    result.addAll(suggestions);
+                String param = Lists.newArrayList(cmd.parameters.keySet()).get(depth);
+                Function<TabContext, List<String>> function = cmd.parameters.getOrDefault(param, null);
+                if (function == null) {
+                    result.add("<" + param + ">");
                     continue;
                 }
 
-                result.add("[<" + param + ">]");
+                List<String> suggestions = function.apply(context);
+                if (suggestions == null || suggestions.isEmpty()) {
+                    result.add("<" + param + ">");
+                    continue;
+                }
+
+                result.addAll(suggestions);
             } catch (Exception ignored) {
             }
         }
@@ -440,12 +431,12 @@ public abstract class Command extends org.bukkit.command.Command {
         Preconditions.checkNotNull(sender, "Sender cannot be null.");
         Preconditions.checkNotNull(args, "Arguments cannot be null.");
 
-        if (this.params == null || this.params.isEmpty()) return true;
+        if (this.parameters == null || this.parameters.isEmpty()) return true;
 
-        if (args.length >= params.size()) return true;
+        if (args.length >= this.parameters.size()) return true;
 
         StringBuilder builder = new StringBuilder();
-        for (String param : params)
+        for (String param : parameters.keySet())
             builder.append("<").append(param).append(">").append(" ");
 
         List<String> parentNames = Lists.newArrayList();
