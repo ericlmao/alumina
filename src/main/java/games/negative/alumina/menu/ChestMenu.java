@@ -136,7 +136,7 @@ public abstract class ChestMenu implements InteractiveMenu {
         inventory.clear();
 
         for (MenuButton button : buttons) {
-            int slot = button.getSlot();
+            int slot = button.slot();
             if (isSlotOccupied(slot) || !button.canView(player)) continue;
 
             ItemStack item = button.getItem();
@@ -162,7 +162,7 @@ public abstract class ChestMenu implements InteractiveMenu {
     public void refreshButton(int slot) {
         Preconditions.checkArgument(MathUtil.between(slot, 0, rows * 9), "Slot must be between 0 and " + (rows * 9));
 
-        MenuButton button = buttons.stream().filter(menuButton -> menuButton.getSlot() == slot).findFirst().orElse(null);
+        MenuButton button = buttons.stream().filter(menuButton -> menuButton.slot() == slot).findFirst().orElse(null);
         if (button == null) return;
 
         ItemStack item = button.getItem();
@@ -223,7 +223,7 @@ public abstract class ChestMenu implements InteractiveMenu {
         String function = NBTEditor.get(meta, FUNCTION, PersistentDataType.STRING);
         if (function == null) {
             // Check by slot.
-            MenuButton button = buttons.stream().filter(menuButton -> menuButton.getSlot() == event.getSlot()).findFirst().orElse(null);
+            MenuButton button = buttons.stream().filter(menuButton -> menuButton.slot() == event.getSlot()).findFirst().orElse(null);
             if (button == null) return;
 
             button.process(player, event);
