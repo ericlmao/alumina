@@ -19,7 +19,7 @@
 <dependency>
     <groupId>com.github.ericlmao</groupId>
     <artifactId>alumina</artifactId>
-    <version>2.9.3</version>
+    <version>3.0.1</version>
 </dependency>
 ```
 
@@ -55,7 +55,7 @@ In case other software in your JVM is using this library, you should shade it in
 maven { url 'https://jitpack.io' }
 ```
 ```groovy
-implementation("com.github.ericlmao:alumina:2.9.3")
+implementation("com.github.ericlmao:alumina:3.0.1")
 ```
 ***
 ![discord](assets/Discord.png)
