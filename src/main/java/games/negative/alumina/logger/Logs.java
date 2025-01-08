@@ -197,6 +197,24 @@ public enum Logs {
     }
 
     /**
+     * Send a custom log message with the given content.
+     * @param content The content of the log message.
+     */
+    public static void custom(@NotNull String content) {
+        CUSTOM.print(content);
+    }
+
+    /**
+     * Send a custom log message with the given content and force flag.
+     * @param content The content of the log message.
+     * @param force true to force the log message to be printed, false to print the log message only if the log messages are not disabled
+     */
+    public static void custom(@NotNull String content, boolean force) {
+        CUSTOM.print(content, force);
+    }
+
+
+    /**
      * Broadcast a message to all players.
      * @param content The content of the message.
      * @param force true to force the message to be broadcasted, false to broadcast the message only if the log messages are not disabled
