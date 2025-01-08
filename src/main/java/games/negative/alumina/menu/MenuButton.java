@@ -26,7 +26,6 @@
 package games.negative.alumina.menu;
 
 import com.google.common.base.Preconditions;
-import games.negative.alumina.model.Unique;
 import lombok.Builder;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -41,7 +40,7 @@ import java.util.function.Predicate;
  * Represents a menu button that can be clicked and triggers an action.
  */
 @Builder
-public class MenuButton implements Unique {
+public class MenuButton  {
 
     private ItemStack item;
     private final int slot;
@@ -99,7 +98,6 @@ public class MenuButton implements Unique {
      *
      * @see UUID
      */
-    @Override
     public @NotNull UUID uuid() {
         return uuid;
     }
@@ -109,7 +107,7 @@ public class MenuButton implements Unique {
      *
      * @return The slot number of the MenuButton.
      */
-    public int getSlot() {
+    public int slot() {
         return slot;
     }
 
@@ -118,6 +116,7 @@ public class MenuButton implements Unique {
      *
      * @return The ItemStack associated with this MenuButton.
      */
+    @NotNull
     public ItemStack getItem() {
         return item;
     }
