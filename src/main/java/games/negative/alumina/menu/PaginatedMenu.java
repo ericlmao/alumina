@@ -180,7 +180,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         String function = NBTEditor.get(meta, FUNCTION, PersistentDataType.STRING);
         if (function == null) {
             // Check by slot.
-            MenuButton button = all.stream().filter(menuButton -> menuButton.getSlot() == event.getSlot()).findFirst().orElse(null);
+            MenuButton button = all.stream().filter(menuButton -> menuButton.slot() == event.getSlot()).findFirst().orElse(null);
             if (button == null) return;
 
             button.process(player, event);
@@ -222,7 +222,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
         inventory.clear();
 
         for (MenuButton button : buttons) {
-            int slot = button.getSlot();
+            int slot = button.slot();
             if (isSlotOccupied(slot) || !button.canView(player)) continue;
 
             ItemStack item = button.getItem();
@@ -275,7 +275,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
 
             item.setItemMeta(meta);
 
-            inventory.setItem(previousPageButton.getSlot(), item);
+            inventory.setItem(previousPageButton.slot(), item);
         }
 
         if (listings.size() > (page * limit)) {
@@ -289,7 +289,7 @@ public abstract class PaginatedMenu implements InteractiveMenu {
 
             item.setItemMeta(meta);
 
-            inventory.setItem(nextPageButton.getSlot(), item);
+            inventory.setItem(nextPageButton.slot(), item);
         }
     }
 
