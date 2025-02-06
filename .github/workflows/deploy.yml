@@ -1,0 +1,43 @@
+name: Deploy to Sonatype Nexus
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '21'
+
+    - name: Configure Maven
+      run: |
+        mkdir -p ~/.m2
+        echo "<settings>
+                <servers>
+                  <server>
+                    <id>nexus</id>
+                    <username>${{ secrets.NEXUS_USERNAME }}</username>
+                    <password>${{ secrets.NEXUS_PASSWORD }}</password>
+                  </server>
+                </servers>
+              </settings>" > ~/.m2/settings.xml
+
+    - name: Build and deploy snapshot
+      if: github.event_name == 'push'
+      run: mvn deploy -DaltDeploymentRepository=nexus::default::https://repo.negative.games/repository/maven-snapshots
+
+    - name: Build and deploy release
+      if: github.event_name == 'release'
+      run: mvn deploy -DaltDeploymentRepository=nexus::default::https://repo.negative.games/repository/maven-releases
