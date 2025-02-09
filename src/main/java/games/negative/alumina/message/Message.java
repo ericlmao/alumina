@@ -184,6 +184,38 @@ public class Message {
          */
         @NotNull
         public <V extends Audience> Component asComponent(@Nullable V viewer) {
+            Component component = provider.deserialize(asMiniMessage(viewer));
+
+            // Replacements for components
+            for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
+                component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
+            }
+
+            // Parse ItemsAdder unicodes if available.
+            if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
+                component = parseItemsAdder(player, component);
+            }
+
+            return component;
+        }
+
+        /**
+         * Get a {@link String} representation of the message.
+         * @return The component representation of the message.
+         */
+        @NotNull
+        public String asMiniMessage() {
+            return asMiniMessage(null);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @param viewer The viewer of the message.
+         * @return The component representation of the message.
+         * @param <V> The type of the viewer.
+         */
+        @NotNull
+        public <V extends Audience> String asMiniMessage(@Nullable V viewer) {
             // Replacements for pre-serialized strings
             for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
                 current = current.replaceAll(entry.getKey(), entry.getValue());
@@ -200,19 +232,7 @@ public class Message {
                 current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, current);
             }
 
-            Component component = provider.deserialize(current);
-
-            // Replacements for components
-            for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
-                component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
-            }
-
-            // Parse ItemsAdder unicodes if available.
-            if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
-                component = parseItemsAdder(player, component);
-            }
-
-            return component;
+            return current;
         }
     }
 
