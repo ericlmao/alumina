@@ -221,15 +221,15 @@ public class Message {
                 current = current.replaceAll(entry.getKey(), entry.getValue());
             }
 
-            // Parse legacy color codes if available.
-            if (current.contains("&")) {
-                current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
-            }
-
             // Parse PlaceholderAPI if available.
             if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 Player player = (viewer instanceof Player) ? (Player) viewer : null;
                 current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, current);
+            }
+
+            // Parse legacy color codes if available.
+            if (current.contains("&")) {
+                current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
             }
 
             return current;
