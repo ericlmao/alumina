@@ -43,6 +43,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Represents a MiniMessage message with placeholders.
@@ -182,17 +183,33 @@ public class Message {
          * @return The component representation of the message.
          * @param <V> The type of the viewer.
          */
-        @NotNull
         public <V extends Audience> Component asComponent(@Nullable V viewer) {
+            return asComponent(viewer, null);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @param viewer The viewer of the message.
+         * @param function The function to apply to the post-process builder.
+         * @return The component representation of the message.
+         * @param <V> The type of the viewer.
+         */
+        @NotNull
+        public <V extends Audience> Component asComponent(@Nullable V viewer, @Nullable Consumer<PostProcessBuilder> function) {
+            PostProcessBuilder builder = new PostProcessBuilder();
+            if (function != null) function.accept(builder);
+
             Component component = provider.deserialize(asMiniMessage(viewer));
 
             // Replacements for components
-            for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
-                component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
+            if (builder.parsePlaceholders) {
+                for (Map.Entry<String, Component> entry : componentPlaceholders.entrySet()) {
+                    component = component.replaceText(TextReplacementConfig.builder().matchLiteral(entry.getKey()).replacement(entry.getValue()).build());
+                }
             }
 
             // Parse ItemsAdder unicodes if available.
-            if (PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
+            if (builder.parseItemsAdder && PluginUtil.hasPlugin("ItemsAdder") && viewer instanceof Player player) {
                 component = parseItemsAdder(player, component);
             }
 
@@ -216,19 +233,36 @@ public class Message {
          */
         @NotNull
         public <V extends Audience> String asMiniMessage(@Nullable V viewer) {
+            return asMiniMessage(viewer, null);
+        }
+
+        /**
+         * Get a {@link Component} representation of the message.
+         * @param viewer The viewer of the message.
+         * @param function The function to apply to the pre-process builder.
+         * @return The component representation of the message.
+         * @param <V> The type of the viewer.
+         */
+        @NotNull
+        public <V extends Audience> String asMiniMessage(@Nullable V viewer, @Nullable Consumer<PreProcessBuilder> function) {
+            PreProcessBuilder builder = new PreProcessBuilder();
+            if (function != null) function.accept(builder);
+
             // Replacements for pre-serialized strings
-            for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
-                current = current.replaceAll(entry.getKey(), entry.getValue());
+            if (builder.parsePlaceholders) {
+                for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
+                    current = current.replaceAll(entry.getKey(), entry.getValue());
+                }
             }
 
             // Parse PlaceholderAPI if available.
-            if (Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            if (builder.parsePlaceholderApi && Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 Player player = (viewer instanceof Player) ? (Player) viewer : null;
                 current = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, current);
             }
 
             // Parse legacy color codes if available.
-            if (current.contains("&")) {
+            if (builder.parseLegacyColors && current.contains("&")) {
                 current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
             }
 
@@ -245,6 +279,42 @@ public class Message {
             return (Component) method;
         } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
             return component;
+        }
+    }
+
+    public static class PreProcessBuilder {
+        private boolean parsePlaceholders = true;
+        private boolean parsePlaceholderApi = true;
+        private boolean parseLegacyColors = true;
+
+        public PreProcessBuilder parsePlaceholders(boolean parsePlaceholders) {
+            this.parsePlaceholders = parsePlaceholders;
+            return this;
+        }
+
+        public PreProcessBuilder parsePlaceholderApi(boolean parsePlaceholderApi) {
+            this.parsePlaceholderApi = parsePlaceholderApi;
+            return this;
+        }
+
+        public PreProcessBuilder parseLegacyColors(boolean parseLegacyColors) {
+            this.parseLegacyColors = parseLegacyColors;
+            return this;
+        }
+    }
+
+    public static class PostProcessBuilder {
+        private boolean parsePlaceholders = true;
+        private boolean parseItemsAdder = true;
+
+        public PostProcessBuilder parsePlaceholders(boolean parsePlaceholders) {
+            this.parsePlaceholders = parsePlaceholders;
+            return this;
+        }
+
+        public PostProcessBuilder parseItemsAdder(boolean parseItemsAdder) {
+            this.parseItemsAdder = parseItemsAdder;
+            return this;
         }
     }
 }
