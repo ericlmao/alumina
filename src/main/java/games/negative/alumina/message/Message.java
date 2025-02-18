@@ -184,22 +184,23 @@ public class Message {
          * @param <V> The type of the viewer.
          */
         public <V extends Audience> Component asComponent(@Nullable V viewer) {
-            return asComponent(viewer, null);
+            return asComponent(viewer, null, null);
         }
 
         /**
          * Get a {@link Component} representation of the message.
          * @param viewer The viewer of the message.
-         * @param function The function to apply to the post-process builder.
+         * @param pre The function to apply to the pre-process builder.
+         * @param post The function to apply to the post-process builder.
          * @return The component representation of the message.
          * @param <V> The type of the viewer.
          */
         @NotNull
-        public <V extends Audience> Component asComponent(@Nullable V viewer, @Nullable Consumer<PostProcessBuilder> function) {
+        public <V extends Audience> Component asComponent(@Nullable V viewer, @Nullable Consumer<PreProcessBuilder> pre, @Nullable Consumer<PostProcessBuilder> post) {
             PostProcessBuilder builder = new PostProcessBuilder();
-            if (function != null) function.accept(builder);
+            if (post != null) post.accept(builder);
 
-            Component component = provider.deserialize(asMiniMessage(viewer));
+            Component component = provider.deserialize(asMiniMessage(viewer, pre));
 
             // Replacements for components
             if (builder.parsePlaceholders) {
@@ -248,13 +249,6 @@ public class Message {
             PreProcessBuilder builder = new PreProcessBuilder();
             if (function != null) function.accept(builder);
 
-            // Replacements for pre-serialized strings
-            if (builder.parsePlaceholders) {
-                for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
-                    current = current.replaceAll(entry.getKey(), entry.getValue());
-                }
-            }
-
             // Parse PlaceholderAPI if available.
             if (builder.parsePlaceholderApi && Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 Player player = (viewer instanceof Player) ? (Player) viewer : null;
@@ -264,6 +258,13 @@ public class Message {
             // Parse legacy color codes if available.
             if (builder.parseLegacyColors && current.contains("&")) {
                 current = LegacyMiniMessageTranslator.legacyToMiniMessage(current);
+            }
+
+            // Replacements for pre-serialized strings
+            if (builder.parsePlaceholders) {
+                for (Map.Entry<String, String> entry : stringPlaceholders.entrySet()) {
+                    current = current.replaceAll(entry.getKey(), entry.getValue());
+                }
             }
 
             return current;
