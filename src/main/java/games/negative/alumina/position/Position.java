@@ -70,7 +70,7 @@ public record Position(World world, double x, double y, double z, float yaw, flo
      */
     @NotNull
     public Block block() {
-        return world.getBlockAt((int) x, (int) y, (int) z);
+        return world.getBlockAt((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
     }
 
     /**
