@@ -74,8 +74,8 @@ public record Vector(double x, double y, double z) {
     }
 
     /**
-     * Calculates the cross-product of this vector and the given vector.
-     * @return A new vector with the cross-product of the coordinates.
+     * Calculates the magnitude (length) of this vector.
+     * @return The magnitude of the vector.
      */
     public double length() {
         return Math.sqrt(x * x + y * y + z * z);
