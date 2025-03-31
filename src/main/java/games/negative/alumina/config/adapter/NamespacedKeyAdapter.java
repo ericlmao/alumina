@@ -36,7 +36,13 @@ public class NamespacedKeyAdapter implements Serializer<NamespacedKey, String> {
 
     @Override
     public NamespacedKey deserialize(String s) {
+        if (s == null || !s.contains(":")) {
+            throw new IllegalArgumentException("Invalid format for NamespacedKey: " + s);
+        }
         String[] split = s.split(":");
+        if (split.length != 2) {
+            throw new IllegalArgumentException("Invalid format for NamespacedKey: " + s);
+        }
         return new NamespacedKey(split[0], split[1]);
     }
 }
