@@ -51,7 +51,8 @@ public record Position(World world, double x, double y, double z, float yaw, flo
      * @return The block position of this position
      */
     public BlockPosition blockPosition() {
-        return new BlockPosition(world, (int) x, (int) y, (int) z);
+        Location loc = new Location(world, x, y, z);
+        return new BlockPosition(world, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
     }
 
     /**
