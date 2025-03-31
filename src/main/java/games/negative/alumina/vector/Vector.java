@@ -65,9 +65,9 @@ public record Vector(double x, double y, double z) {
     }
 
     /**
-     * Divides this vector by the given scalar.
-     * @param other The scalar to divide by.
-     * @return A new vector with the quotient of the coordinates.
+     * Calculates the dot product of this vector and the given vector.
+     * @param other The other vector to calculate the dot product with.
+     * @return The dot product of the two vectors.
      */
     public double dot(Vector other) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
