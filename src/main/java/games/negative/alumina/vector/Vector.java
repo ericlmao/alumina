@@ -184,4 +184,14 @@ public record Vector(double x, double y, double z) {
 
         return Math.abs(this.x - x1) < 1.0E-6 && Math.abs(this.y - y1) < 1.0E-6 && Math.abs(this.z - z1) < 1.0E-6;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+
+        hash = 79 * hash + Long.hashCode(Double.doubleToLongBits(this.x));
+        hash = 79 * hash + Long.hashCode(Double.doubleToLongBits(this.y));
+        hash = 79 * hash + Long.hashCode(Double.doubleToLongBits(this.z));
+        return hash;
+    }
 }
