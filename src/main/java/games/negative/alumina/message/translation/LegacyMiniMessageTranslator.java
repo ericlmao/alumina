@@ -27,6 +27,7 @@ package games.negative.alumina.message.translation;
 
 import com.google.common.collect.Maps;
 import lombok.experimental.UtilityClass;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,6 +76,8 @@ public class LegacyMiniMessageTranslator {
         for (Map.Entry<String, String> entry : legacyToMiniMessage.entrySet()) {
             content = content.replaceAll("&" + entry.getKey(), entry.getValue());
         }
+
+        content = content.replaceAll("&#([A-Fa-f0-9]{6})", "<color:#$1>");
 
         return content;
     }
