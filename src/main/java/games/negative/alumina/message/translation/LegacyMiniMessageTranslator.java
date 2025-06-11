@@ -27,17 +27,19 @@ package games.negative.alumina.message.translation;
 
 import com.google.common.collect.Maps;
 import lombok.experimental.UtilityClass;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @UtilityClass
 @ApiStatus.Internal
 public class LegacyMiniMessageTranslator {
 
     private final Map<String, String> legacyToMiniMessage = Maps.newConcurrentMap();
+    private final Pattern LEGACY_HEX_PATTERN = Pattern.compile("&#[a-fA-F0-9]{6}");
 
     /**
      * Translates a legacy message to a MiniMessage message.
@@ -77,9 +79,15 @@ public class LegacyMiniMessageTranslator {
             content = content.replaceAll("&" + entry.getKey(), entry.getValue());
         }
 
-        content = content.replaceAll("&#([A-Fa-f0-9]{6})", "<color:#$1>");
+        Matcher match = LEGACY_HEX_PATTERN.matcher(content);
+        String code = content;
+        while (match.find()) {
+            code = content.substring(match.start(), match.end());
+            code = code.replace("&", "<");
+            code = code + ">";
+        }
 
-        return content;
+        return content.replaceAll(LEGACY_HEX_PATTERN.pattern(), code);
     }
 
 }

@@ -26,6 +26,7 @@
 
 package games.negative.alumina.util;
 
+import games.negative.alumina.message.translation.LegacyMiniMessageTranslator;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -63,7 +64,7 @@ public class MiniMessageUtil {
     @NotNull
     public Component translate(@NotNull String message, @Nullable MiniMessage instance) {
         MiniMessage mm = instance == null ? MiniMessageUtil.mm : instance;
-        return mm.deserialize(message);
+        return mm.deserialize(LegacyMiniMessageTranslator.legacyToMiniMessage(message));
     }
 
     /**

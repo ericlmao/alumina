@@ -113,6 +113,18 @@ public class ItemBuilder {
         this(ItemStack.of(material, amount));
     }
 
+    public static ItemBuilder of(@NotNull final ItemStack item) {
+        return new ItemBuilder(item);
+    }
+
+    public static ItemBuilder of(@NotNull final Material material) {
+        return new ItemBuilder(material);
+    }
+
+    public static ItemBuilder of(@NotNull final Material material, final int amount) {
+        return new ItemBuilder(material, amount);
+    }
+
     /**
      * Set the display name of the item.
      * @param text The text to set the display name to.
@@ -129,6 +141,16 @@ public class ItemBuilder {
 
     /**
      * Set the display name of the item.
+     * @param text The text to set the display name to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder name(@NotNull final String text) {
+        return setName(text);
+    }
+
+    /**
+     * Set the display name of the item.
      * @param component The component to set the display name to.
      * @return The current instance of the builder.
      */
@@ -139,6 +161,16 @@ public class ItemBuilder {
         this.meta.displayName(component);
         applyMeta();
         return this;
+    }
+
+    /**
+     * Set the display name of the item.
+     * @param component The component to set the display name to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder name(@NotNull final Component component) {
+        return setName(component);
     }
 
     /**
@@ -199,6 +231,16 @@ public class ItemBuilder {
 
     /**
      * Set the lore of the item.
+     * @param text The text to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder lore(@NotNull final String... text) {
+        return setLore(text);
+    }
+
+    /**
+     * Set the lore of the item.
      * @param components The components to set the lore to.
      * @return The current instance of the builder.
      */
@@ -210,6 +252,16 @@ public class ItemBuilder {
         this.meta.lore(Arrays.asList(components));
         applyMeta();
         return this;
+    }
+
+    /**
+     * Set the lore of the item.
+     * @param components The components to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder lore(@NotNull final Component... components) {
+        return setLore(components);
     }
 
     /**
@@ -230,11 +282,43 @@ public class ItemBuilder {
 
     /**
      * Set the lore of the item.
+     * @param text The text to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder lore(@NotNull final List<String> text) {
+        Preconditions.checkNotNull(text, "Components cannot be null!");
+        Preconditions.checkArgument(!text.isEmpty(), "Components cannot be empty!");
+
+        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
+        this.meta.lore(components);
+        applyMeta();
+        return this;
+    }
+
+
+    /**
+     * Set the lore of the item.
      * @param components The components to set the lore to.
      * @return The current instance of the builder.
      */
     @CheckReturnValue
     public ItemBuilder setLore(@NotNull final Collection<Component> components) {
+        Preconditions.checkNotNull(components, "Components cannot be null!");
+        Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
+
+        this.meta.lore(components.stream().toList());
+        applyMeta();
+        return this;
+    }
+
+    /**
+     * Set the lore of the item.
+     * @param components The components to set the lore to.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder lore(@NotNull final Collection<Component> components) {
         Preconditions.checkNotNull(components, "Components cannot be null!");
         Preconditions.checkArgument(!components.isEmpty(), "Components cannot be empty!");
 
@@ -489,6 +573,25 @@ public class ItemBuilder {
     }
 
     /**
+     * Set the item to be unbreakable.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder unbreakable() {
+        return setUnbreakable(true);
+    }
+
+    /**
+     * Set the item to be unbreakable.
+     * @param showInToolTip Whether to show the unbreakable status in the tooltip.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder unbreakable(boolean showInToolTip) {
+        return setUnbreakable(showInToolTip);
+    }
+
+    /**
      * Add an item flag to the item.
      * @param flags The flags to add.
      * @return The current instance of the builder.
@@ -664,6 +767,16 @@ public class ItemBuilder {
     @CheckReturnValue
     public ItemBuilder glowing(boolean value) {
         item.setData(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, value);
+        return this;
+    }
+
+    /**
+     * Set the item to hide the tooltip.
+     * @return The current instance of the builder.
+     */
+    @CheckReturnValue
+    public ItemBuilder hideToolTip() {
+        item.setData(DataComponentTypes.HIDE_TOOLTIP);
         return this;
     }
     

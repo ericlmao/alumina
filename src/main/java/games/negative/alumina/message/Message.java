@@ -71,6 +71,33 @@ public class Message {
     }
 
     /**
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
+     */
+    @CheckReturnValue
+    public static Message of(@NotNull String content) {
+        return new Message(content);
+    }
+
+    /**
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
+     */
+    @CheckReturnValue
+    public static Message of(@NotNull String... content) {
+        return new Message(content);
+    }
+
+    /**
+     * Creates a new message with the specified content.
+     * @param content The content of the message.
+     */
+    @CheckReturnValue
+    public static Message of(@NotNull List<String> content) {
+        return new Message(String.join("<newline>", content));
+    }
+
+    /**
      * Get the content of the message.
      * @return The content of the message.
      */
