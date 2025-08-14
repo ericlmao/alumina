@@ -29,6 +29,7 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import games.negative.alumina.util.MiniMessageUtil;
+import games.negative.alumina.util.PlaceholderUtil;
 import io.papermc.paper.datacomponent.DataComponentBuilder;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Unbreakable;
@@ -44,6 +45,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,6 +55,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -71,6 +74,7 @@ public class ItemBuilder {
 
     private final ItemStack item;
     private ItemMeta meta;
+    private Player viewer;
 
     /**
      * Creates a new {@link ItemBuilder} instance from an existing {@link ItemStack}.
@@ -81,6 +85,22 @@ public class ItemBuilder {
 
         this.item = item.clone();
         this.meta = this.item.getItemMeta();
+
+        Preconditions.checkNotNull(this.meta, "ItemMeta cannot be null!");
+    }
+
+    /**
+     * Creates a new {@link ItemBuilder} instance from an existing {@link ItemStack} and a viewer.
+     * @param item The item to create the builder from.
+     * @param viewer The player viewing the item, can be null if not applicable.
+     */
+    public ItemBuilder(@NotNull final ItemStack item, @Nullable Player viewer) {
+        Preconditions.checkNotNull(item, "Item cannot be null!");
+
+        this.item = item.clone();
+        this.meta = this.item.getItemMeta();
+
+        this.viewer = viewer;
 
         Preconditions.checkNotNull(this.meta, "ItemMeta cannot be null!");
     }
@@ -105,6 +125,15 @@ public class ItemBuilder {
     }
 
     /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link Material} and viewer.
+     * @param material The material to create the builder from.
+     * @param viewer The player viewing the item, can be null if not applicable.
+     */
+    public ItemBuilder(@NotNull final Material material, @Nullable Player viewer) {
+        this(ItemStack.of(material), viewer);
+    }
+
+    /**
      * Creates a new {@link ItemBuilder} instance from the provided {@link Material} and amount.
      * @param material The material to create the builder from.
      * @param amount The amount of the item.
@@ -113,14 +142,50 @@ public class ItemBuilder {
         this(ItemStack.of(material, amount));
     }
 
+    /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link ItemStack}.
+     * @param item The item to create the builder from.
+     * @return A new instance of {@link ItemBuilder} with the provided item.
+     */
     public static ItemBuilder of(@NotNull final ItemStack item) {
         return new ItemBuilder(item);
     }
 
+    /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link ItemStack} and viewer.
+     * @param item The item to create the builder from.
+     * @param viewer The player viewing the item, can be null if not applicable.
+     * @return A new instance of {@link ItemBuilder} with the provided item and viewer.
+     */
+    public static ItemBuilder of(@NotNull final ItemStack item, @Nullable Player viewer) {
+        return new ItemBuilder(item, viewer);
+    }
+
+    /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link Material}.
+     * @param material The material to create the builder from.
+     * @return A new instance of {@link ItemBuilder} with the provided material.
+     */
     public static ItemBuilder of(@NotNull final Material material) {
         return new ItemBuilder(material);
     }
 
+    /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link Material} and viewer.
+     * @param material The material to create the builder from.
+     * @param viewer The player viewing the item, can be null if not applicable.
+     * @return A new instance of {@link ItemBuilder} with the provided material and viewer.
+     */
+    public static ItemBuilder of(@NotNull final Material material, @Nullable Player viewer) {
+        return new ItemBuilder(material, viewer);
+    }
+
+    /**
+     * Creates a new {@link ItemBuilder} instance from the provided {@link Material} and amount.
+     * @param material The material to create the builder from.
+     * @param amount The amount of the item.
+     * @return A new instance of {@link ItemBuilder} with the provided material and amount.
+     */
     public static ItemBuilder of(@NotNull final Material material, final int amount) {
         return new ItemBuilder(material, amount);
     }
@@ -131,8 +196,10 @@ public class ItemBuilder {
      * @return The current instance of the builder.
      */
     @CheckReturnValue
-    public ItemBuilder setName(@NotNull final String text) {
+    public ItemBuilder setName(@NotNull String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
+
+        text = PlaceholderUtil.applyPlaceholders(viewer, text);
 
         this.meta.displayName(MiniMessageUtil.translate(text, MINIMESSAGE));
         applyMeta();
@@ -223,7 +290,11 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(text.length > 0, "Text cannot be empty!");
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).collect(Collectors.toList());
+
         this.meta.lore(components);
         applyMeta();
         return this;
@@ -274,7 +345,11 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Text cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Text cannot be empty!");
 
-        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
+        List<Component> components = text.stream().map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).collect(Collectors.toList());
+
         this.meta.lore(components);
         applyMeta();
         return this;
@@ -290,7 +365,11 @@ public class ItemBuilder {
         Preconditions.checkNotNull(text, "Components cannot be null!");
         Preconditions.checkArgument(!text.isEmpty(), "Components cannot be empty!");
 
-        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
+        List<Component> components = text.stream().map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).collect(Collectors.toList());
+
         this.meta.lore(components);
         applyMeta();
         return this;
@@ -333,11 +412,13 @@ public class ItemBuilder {
      * @return The current instance of the builder.
      */
     @CheckReturnValue
-    public ItemBuilder addLoreLine(@NotNull final String text) {
+    public ItemBuilder addLoreLine(@NotNull String text) {
         Preconditions.checkNotNull(text, "Text cannot be null!");
 
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
+
+        text = PlaceholderUtil.applyPlaceholders(viewer, text);
 
         lore.add(MiniMessageUtil.translate(text, MINIMESSAGE));
         this.meta.lore(lore);
@@ -378,7 +459,11 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = Arrays.stream(text).map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).collect(Collectors.toList());
+        List<Component> components = Arrays.stream(text).map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).toList();
+
         lore.addAll(components);
 
         this.meta.lore(lore);
@@ -420,7 +505,11 @@ public class ItemBuilder {
         List<Component> lore = this.meta.lore();
         if (lore == null) lore = Lists.newArrayList();
 
-        List<Component> components = text.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).toList();
+        List<Component> components = text.stream().map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).toList();
+
         lore.addAll(components);
 
         this.meta.lore(lore);
@@ -496,7 +585,10 @@ public class ItemBuilder {
      */
     @CheckReturnValue
     public ItemBuilder replaceLore(@NotNull String placeholder, @NotNull List<String> replacement) {
-        return replaceLore(placeholder, replacement.stream().map(s -> MiniMessageUtil.translate(s, MINIMESSAGE)).map(component -> (TextComponent) component).toList());
+        return replaceLore(placeholder, replacement.stream().map(line -> {
+            line = PlaceholderUtil.applyPlaceholders(viewer, line);
+            return MiniMessageUtil.translate(line, MINIMESSAGE);
+        }).map(component -> (TextComponent) component).toList());
     }
 
     /**
