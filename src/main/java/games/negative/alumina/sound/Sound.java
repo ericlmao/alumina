@@ -1,5 +1,30 @@
+/*
+ * MIT License
+ *
+ * Copyright (C) 2025 Negative Games
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package games.negative.alumina.sound;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -12,6 +37,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import javax.naming.ldap.PagedResultsControl;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 
@@ -87,15 +113,49 @@ public record Sound(
         playSound(location, this.volume, this.pitch);
     }
 
-    // --- Builders ---
-    public static Sound of(@NotNull NamespacedKey key) {
-        return new Sound(key, 1.0f, 1.0f);
-    }
+    // --- Builders --- \\
 
+    /**
+     * Make a customizable sound from {@link NamespacedKey}
+     * @param key The key of the sound
+     * @param volume The specified volume
+     * @param pitch The specified pitch
+     * @return {@link Sound} instance
+     */
     public static Sound of(@NotNull NamespacedKey key, float volume, float pitch) {
         return new Sound(key, volume, pitch);
     }
 
-    public static Sound of(@NotNull org.bukkit.Sound )
+    /**
+     * Make a customizable sound from {@link NamespacedKey}
+     * @param key The key of the sound
+     * @return {@link Sound} instance
+     */
+    public static Sound of(@NotNull NamespacedKey key) {
+        return of(key, 1.0f, 1.0f);
+    }
+
+    /**
+     * Make a customizable sound from {@link org.bukkit.Sound}
+     * @param sound The specified sound
+     * @param volume The specified volume
+     * @param pitch The specified pitch
+     * @return {@link Sound} instance
+     */
+    public static Sound of(@NotNull org.bukkit.Sound sound, float volume, float pitch) {
+        NamespacedKey key = RegistryAccess.registryAccess().getRegistry(RegistryKey.SOUND_EVENT).getKey(sound);
+        Preconditions.checkNotNull(key, "Could not find sound for key " + key);
+
+        return of(key, volume, pitch);
+    }
+
+    /**
+     * Make a customizable sound from {@link org.bukkit.Sound}
+     * @param sound The specified sound
+     * @return {@link Sound} instance
+     */
+    public static Sound of(@NotNull org.bukkit.Sound sound) {
+        return of(sound, 1.0f, 1.0f);
+    }
 
 }
